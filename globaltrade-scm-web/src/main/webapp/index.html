@@ -28,37 +28,36 @@
                 <h5 class="card-title text-primary mb-3">Dispatch Shipment (CMT Atomic)</h5>
                 <form id="scmForm">
                     <div class="mb-2">
-                        <label class="form-label">Tracking Number</label>
+                        <label for="trackNo" class="form-label">Tracking Number</label>
                         <input type="text" id="trackNo" class="form-control form-control-sm" placeholder="e.g. TRK-88001" required>
                     </div>
                     <div class="row">
                         <div class="col-md-6 mb-2">
-                            <label class="form-label">Origin</label>
+                            <label for="origin" class="form-label">Origin</label>
                             <input type="text" id="origin" class="form-control form-control-sm" value="Singapore" required>
                         </div>
                         <div class="col-md-6 mb-2">
-                            <label class="form-label">Destination</label>
+                            <label for="destination" class="form-label">Destination</label>
                             <input type="text" id="destination" class="form-control form-control-sm" value="Colombo" required>
                         </div>
                     </div>
                     <div class="mb-2">
-                        <label class="form-label">Payload Weight (kg) <small class="text-danger">(Max: 50000kg)</small></label>
+                        <label for="weight" class="form-label">Payload Weight (kg) <small class="text-danger">(Max: 50000kg)</small></label>
                         <input type="number" id="weight" class="form-control form-control-sm" placeholder="52000 triggers Rollback" required>
                     </div>
                     <div class="mb-2">
-                        <label class="form-label">Vendor ID</label>
-                        <select id="vendor" class="form-select form-select-sm">
-                            <option value="vendor_global">vendor_global</option>
-                            <option value="admin_user">admin_user</option>
+                        <label for="vendor" class="form-label">Vendor ID</label>
+                        <select id="vendor" class="form-select form-select-sm" required>
+                            <option value="">Loading vendors...</option>
                         </select>
                     </div>
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Inventory Item</label>
+                            <label for="itemSelect" class="form-label">Inventory Item</label>
                             <select id="itemSelect" class="form-select form-select-sm"></select>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Quantity</label>
+                            <label for="qty" class="form-label">Quantity</label>
                             <input type="number" id="qty" class="form-control form-control-sm" value="10" required>
                         </div>
                     </div>
@@ -98,37 +97,56 @@
     const API = '/scm/api/scm';
 
     async function loadData() {
-        // Load Inventory
-        const invRes = await fetch(`${API}/inventory`);
-        const invData = await invRes.json();
-        const sel = document.getElementById('itemSelect');
-        sel.innerHTML = '';
-        invData.forEach(i => {
-            sel.innerHTML += `<option value="${i.id}">${i.itemName} (Stock: ${i.quantityAvailable})</option>`;
-        });
+        try {
+            // 1. Load Vendors from Database
+            const userRes = await fetch(`${API}/users`);
+            if (userRes.ok) {
+                const userData = await userRes.json();
+                const vendorSel = document.getElementById('vendor');
+                vendorSel.innerHTML = '';
+                userData.forEach(u => {
+                    vendorSel.innerHTML += `<option value="${u.username}">${u.username} (${u.role})</option>`;
+                });
+            }
 
-        // Load Shipments
-        const shipRes = await fetch(`${API}/shipments`);
-        const shipData = await shipRes.json();
-        const tbody = document.getElementById('shipmentTable');
-        tbody.innerHTML = '';
-        if (shipData.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">No shipments found.</td></tr>';
-            return;
+            // 2. Load Inventory from Database
+            const invRes = await fetch(`${API}/inventory`);
+            if (invRes.ok) {
+                const invData = await invRes.json();
+                const itemSel = document.getElementById('itemSelect');
+                itemSel.innerHTML = '';
+                invData.forEach(i => {
+                    itemSel.innerHTML += `<option value="${i.id}">${i.itemName} (Stock: ${i.quantityAvailable})</option>`;
+                });
+            }
+
+            // 3. Load Shipments from Database
+            const shipRes = await fetch(`${API}/shipments`);
+            if (shipRes.ok) {
+                const shipData = await shipRes.json();
+                const tbody = document.getElementById('shipmentTable');
+                tbody.innerHTML = '';
+                if (shipData.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">No shipments found.</td></tr>';
+                    return;
+                }
+                shipData.forEach(s => {
+                    tbody.innerHTML += `
+                    <tr>
+                        <td><strong>${s.trackingNumber}</strong></td>
+                        <td>${s.originCountry} &rarr; ${s.destinationCountry}</td>
+                        <td>${s.payloadWeight} kg</td>
+                        <td><span class="badge bg-${s.status === 'PENDING' ? 'warning' : 'success'}">${s.status}</span></td>
+                        <td>
+                            <button class="btn btn-sm btn-success py-0" onclick="clearance(${s.id}, true)">Pass</button>
+                            <button class="btn btn-sm btn-danger py-0" onclick="clearance(${s.id}, false)">Reject</button>
+                        </td>
+                    </tr>`;
+                });
+            }
+        } catch (e) {
+            console.error('Error fetching data:', e);
         }
-        shipData.forEach(s => {
-            tbody.innerHTML += `
-                <tr>
-                    <td><strong>${s.trackingNumber}</strong></td>
-                    <td>${s.originCountry} &rarr; ${s.destinationCountry}</td>
-                    <td>${s.payloadWeight} kg</td>
-                    <td><span class="badge bg-${s.status === 'PENDING' ? 'warning' : 'success'}">${s.status}</span></td>
-                    <td>
-                        <button class="btn btn-sm btn-success py-0" onclick="clearance(${s.id}, true)">Pass</button>
-                        <button class="btn btn-sm btn-danger py-0" onclick="clearance(${s.id}, false)">Reject</button>
-                    </td>
-                </tr>`;
-        });
     }
 
     document.getElementById('scmForm').addEventListener('submit', async (e) => {
@@ -150,7 +168,7 @@
         if (res.ok) {
             alertBox.innerHTML = '<div class="alert alert-success py-2">Consignment Dispatched & SLA Timer Started!</div>';
             document.getElementById('scmForm').reset();
-            loadData();
+            await loadData();
         } else {
             const err = await res.json();
             alertBox.innerHTML = `<div class="alert alert-danger py-2"><strong>Transaction Aborted:</strong> ${err.error}</div>`;
@@ -159,10 +177,12 @@
 
     async function clearance(id, status) {
         await fetch(`${API}/shipments/${id}/clearance?approved=${status}`, { method: 'POST' });
-        loadData();
+        await loadData();
     }
 
-    loadData();
+    window.addEventListener('DOMContentLoaded', async () => {
+        await loadData();
+    });
 </script>
 </body>
 </html>

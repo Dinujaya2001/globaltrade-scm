@@ -10,8 +10,8 @@ import lk.globaltrade.scm.timer.AutomatedTrackingTimerService;
 
 import javax.annotation.Resource;
 import javax.annotation.security.DeclareRoles;
-import javax.annotation.security.RolesAllowed;
 import javax.ejb.EJB;
+import javax.ejb.LocalBean;
 import javax.ejb.SessionContext;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
@@ -19,12 +19,14 @@ import javax.ejb.TransactionAttributeType;
 import javax.interceptor.Interceptors;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import java.io.Serializable;
 import java.util.List;
 
 @Stateless
+@LocalBean
 @DeclareRoles({"LOGISTICS_ADMIN", "CUSTOMS_AGENT", "VENDOR"})
 @Interceptors(LogisticsAuditInterceptor.class)
-public class OrderProcessingService {
+public class OrderProcessingService implements Serializable {
 
     @PersistenceContext(unitName = "SCMPU")
     private EntityManager em;
@@ -40,7 +42,6 @@ public class OrderProcessingService {
                                             double weight, String vendorUsername, Long itemId, int qty)
             throws SupplyChainDisruptionException {
 
-        // Business Rule Exception Rollback Validation
         if (weight > 50000.0) {
             throw new SupplyChainDisruptionException("Payload weight (" + weight + " kg) exceeds air cargo safety limits. JTA Transaction Aborted.");
         }
@@ -55,11 +56,9 @@ public class OrderProcessingService {
             throw new SupplyChainDisruptionException("Insufficient warehouse stock for item ID: " + itemId);
         }
 
-        // Deduct inventory atomically
         inventory.setQuantityAvailable(inventory.getQuantityAvailable() - qty);
         em.merge(inventory);
 
-        // Persist Shipment
         Shipment shipment = new Shipment();
         shipment.setTrackingNumber(trackingNo);
         shipment.setOriginCountry(origin);
@@ -69,11 +68,9 @@ public class OrderProcessingService {
         shipment.setVendor(vendor);
         em.persist(shipment);
 
-        // Link Shipment Items (Junction Table)
         ShipmentItem itemLink = new ShipmentItem(shipment, inventory, qty);
         em.persist(itemLink);
 
-        // Schedule SLA Timer (5 minutes = 300000 ms)
         timerService.registerSlaMonitor(trackingNo, 300000);
 
         return shipment;
@@ -87,5 +84,10 @@ public class OrderProcessingService {
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
     public List<InventoryItem> getAllInventory() {
         return em.createQuery("SELECT i FROM InventoryItem i", InventoryItem.class).getResultList();
+    }
+
+    @TransactionAttribute(TransactionAttributeType.SUPPORTS)
+    public List<User> getAllUsers() {
+        return em.createQuery("SELECT u FROM User u", User.class).getResultList();
     }
 }

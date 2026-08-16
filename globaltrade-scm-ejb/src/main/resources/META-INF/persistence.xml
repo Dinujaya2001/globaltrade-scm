@@ -3,15 +3,18 @@
              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
              xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence http://xmlns.jcp.org/xml/ns/persistence/persistence_2_2.xsd">
     <persistence-unit name="SCMPU" transaction-type="JTA">
-        <jta-data-source>java:jboss/datasources/SCMDataSource</jta-data-source>
+        <!-- WildFly built-in working datasource -->
+        <jta-data-source>java:jboss/datasources/ExampleDS</jta-data-source>
+
         <class>lk.globaltrade.scm.entity.User</class>
         <class>lk.globaltrade.scm.entity.Shipment</class>
         <class>lk.globaltrade.scm.entity.InventoryItem</class>
         <class>lk.globaltrade.scm.entity.ShipmentItem</class>
         <class>lk.globaltrade.scm.entity.AuditTrail</class>
+
         <properties>
-            <property name="hibernate.dialect" value="org.hibernate.dialect.MySQL8Dialect"/>
-            <property name="hibernate.show_sql" value="false"/>
+            <property name="hibernate.hbm2ddl.auto" value="update"/>
+            <property name="hibernate.show_sql" value="true"/>
             <property name="hibernate.format_sql" value="true"/>
         </properties>
     </persistence-unit>

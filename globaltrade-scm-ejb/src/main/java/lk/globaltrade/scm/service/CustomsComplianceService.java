@@ -3,16 +3,19 @@ package lk.globaltrade.scm.service;
 import lk.globaltrade.scm.entity.Shipment;
 
 import javax.annotation.Resource;
+import javax.ejb.LocalBean;
 import javax.ejb.Stateful;
 import javax.ejb.TransactionManagement;
 import javax.ejb.TransactionManagementType;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.transaction.UserTransaction;
+import java.io.Serializable;
 
 @Stateful
+@LocalBean
 @TransactionManagement(TransactionManagementType.BEAN)
-public class CustomsComplianceService {
+public class CustomsComplianceService implements Serializable {
 
     @PersistenceContext(unitName = "SCMPU")
     private EntityManager em;

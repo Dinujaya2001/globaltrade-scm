@@ -6,11 +6,13 @@ import lk.globaltrade.scm.service.CustomsComplianceService;
 import lk.globaltrade.scm.service.OrderProcessingService;
 
 import javax.ejb.EJB;
+import javax.ejb.Stateless;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.List;
 
+@Stateless
 @Path("/scm")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
@@ -62,5 +64,11 @@ public class ShipmentResource {
             return Response.ok("{\"message\": \"Customs verification successfully processed\"}").build();
         }
         return Response.status(Response.Status.BAD_REQUEST).entity("{\"error\": \"Failed to process clearance\"}").build();
+    }
+
+    @GET
+    @Path("/users")
+    public Response getUsers() {
+        return Response.ok(orderProcessingService.getAllUsers()).build();
     }
 }
