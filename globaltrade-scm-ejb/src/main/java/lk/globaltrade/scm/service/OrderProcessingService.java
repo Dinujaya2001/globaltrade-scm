@@ -10,6 +10,8 @@ import lk.globaltrade.scm.timer.AutomatedTrackingTimerService;
 
 import javax.annotation.Resource;
 import javax.annotation.security.DeclareRoles;
+import javax.annotation.security.PermitAll;
+import javax.annotation.security.RolesAllowed;
 import javax.ejb.EJB;
 import javax.ejb.LocalBean;
 import javax.ejb.SessionContext;
@@ -37,6 +39,7 @@ public class OrderProcessingService implements Serializable {
     @EJB
     private AutomatedTrackingTimerService timerService;
 
+    @PermitAll
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public Shipment createShipmentWithItems(String trackingNo, String origin, String destination,
                                             double weight, String vendorUsername, Long itemId, int qty)
@@ -76,16 +79,19 @@ public class OrderProcessingService implements Serializable {
         return shipment;
     }
 
+    @PermitAll
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
     public List<Shipment> getAllShipments() {
         return em.createQuery("SELECT s FROM Shipment s ORDER BY s.id DESC", Shipment.class).getResultList();
     }
 
+    @PermitAll
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
     public List<InventoryItem> getAllInventory() {
         return em.createQuery("SELECT i FROM InventoryItem i", InventoryItem.class).getResultList();
     }
 
+    @PermitAll
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
     public List<User> getAllUsers() {
         return em.createQuery("SELECT u FROM User u", User.class).getResultList();

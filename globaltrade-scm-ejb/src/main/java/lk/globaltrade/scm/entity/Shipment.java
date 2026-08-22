@@ -1,5 +1,6 @@
 package lk.globaltrade.scm.entity;
 
+import javax.json.bind.annotation.JsonbTransient;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -32,6 +33,7 @@ public class Shipment implements Serializable {
     @JoinColumn(name = "vendor_id", referencedColumnName = "username", nullable = false)
     private User vendor;
 
+    @JsonbTransient
     @OneToMany(mappedBy = "shipment", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<ShipmentItem> items = new ArrayList<>();
 

@@ -3,6 +3,7 @@ package lk.globaltrade.scm.service;
 import lk.globaltrade.scm.entity.Shipment;
 
 import javax.annotation.Resource;
+import javax.annotation.security.PermitAll;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateful;
 import javax.ejb.TransactionManagement;
@@ -23,6 +24,7 @@ public class CustomsComplianceService implements Serializable {
     @Resource
     private UserTransaction userTx;
 
+    @PermitAll
     public boolean updateCustomsClearance(Long shipmentId, boolean approved) {
         try {
             userTx.begin();
