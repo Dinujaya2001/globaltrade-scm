@@ -49,10 +49,23 @@ public class ShipmentResource {
     @Path("/inventory")
     public Response getInventory() {
         try {
-            List<InventoryItem> items = lookupOrderService().getAllInventory();
-            return Response.ok(items).build();
+            return Response.ok(lookupOrderService().getAllInventory()).build();
         } catch (Exception e) {
             return Response.status(500).entity("{\"error\": \"" + e.getMessage() + "\"}").build();
+        }
+    }
+
+    @POST
+    @Path("/inventory")
+    public Response createInventoryItem(@QueryParam("code") String code,
+                                        @QueryParam("name") String name,
+                                        @QueryParam("qty") int qty,
+                                        @QueryParam("threshold") int threshold) {
+        try {
+            InventoryItem item = lookupOrderService().createInventoryItem(code, name, qty, threshold);
+            return Response.status(Response.Status.CREATED).entity(item).build();
+        } catch (Exception ex) {
+            return Response.status(Response.Status.BAD_REQUEST).entity("{\"error\": \"" + ex.getMessage() + "\"}").build();
         }
     }
 
@@ -60,10 +73,22 @@ public class ShipmentResource {
     @Path("/users")
     public Response getUsers() {
         try {
-            List<User> users = lookupOrderService().getAllUsers();
-            return Response.ok(users).build();
+            return Response.ok(lookupOrderService().getAllUsers()).build();
         } catch (Exception e) {
             return Response.status(500).entity("{\"error\": \"" + e.getMessage() + "\"}").build();
+        }
+    }
+
+    @POST
+    @Path("/users")
+    public Response createUser(@QueryParam("username") String username,
+                               @QueryParam("password") String password,
+                               @QueryParam("role") String role) {
+        try {
+            User user = lookupOrderService().createUser(username, password, role);
+            return Response.status(Response.Status.CREATED).entity(user).build();
+        } catch (Exception ex) {
+            return Response.status(Response.Status.BAD_REQUEST).entity("{\"error\": \"" + ex.getMessage() + "\"}").build();
         }
     }
 
@@ -71,8 +96,7 @@ public class ShipmentResource {
     @Path("/shipments")
     public Response getShipments() {
         try {
-            List<Shipment> shipments = lookupOrderService().getAllShipments();
-            return Response.ok(shipments).build();
+            return Response.ok(lookupOrderService().getAllShipments()).build();
         } catch (Exception e) {
             return Response.status(500).entity("{\"error\": \"" + e.getMessage() + "\"}").build();
         }
@@ -92,9 +116,7 @@ public class ShipmentResource {
                     trackingNo, origin, destination, weight, vendor, itemId, qty);
             return Response.status(Response.Status.CREATED).entity(result).build();
         } catch (Exception ex) {
-            return Response.status(Response.Status.BAD_REQUEST)
-                    .entity("{\"error\": \"" + ex.getMessage() + "\"}")
-                    .build();
+            return Response.status(Response.Status.BAD_REQUEST).entity("{\"error\": \"" + ex.getMessage() + "\"}").build();
         }
     }
 

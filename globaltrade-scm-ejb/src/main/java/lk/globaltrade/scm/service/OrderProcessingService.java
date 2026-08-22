@@ -73,6 +73,30 @@ public class OrderProcessingService implements Serializable {
         return shipment;
     }
 
+    // New Admin Action: Register User / Vendor
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public User createUser(String username, String password, String role) throws SupplyChainDisruptionException {
+        if (em.find(User.class, username) != null) {
+            throw new SupplyChainDisruptionException("User already exists with username: " + username);
+        }
+        User user = new User(username, password, role);
+        em.persist(user);
+        return user;
+    }
+
+    // New Admin Action: Add Inventory Item
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public InventoryItem createInventoryItem(String itemCode, String itemName, int qty, int reorderThreshold)
+            throws SupplyChainDisruptionException {
+        InventoryItem item = new InventoryItem();
+        item.setItemCode(itemCode);
+        item.setItemName(itemName);
+        item.setQuantityAvailable(qty);
+        item.setReorderThreshold(reorderThreshold);
+        em.persist(item);
+        return item;
+    }
+
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
     public List<Shipment> getAllShipments() {
         return em.createQuery("SELECT s FROM Shipment s ORDER BY s.id DESC", Shipment.class).getResultList();

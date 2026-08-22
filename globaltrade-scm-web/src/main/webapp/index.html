@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GlobalTrade Logistics - Enterprise SCM Modernization Portal</title>
+    <title>GlobalTrade Logistics - Enterprise SCM Management Portal</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -15,9 +15,6 @@
             --card-border: rgba(255, 255, 255, 0.08);
             --text-main: #f8fafc;
             --text-muted: #94a3b8;
-            --accent-cyan: #38bdf8;
-            --accent-emerald: #10b981;
-            --accent-rose: #f43f5e;
         }
 
         body {
@@ -43,6 +40,18 @@
             border: 1px solid var(--card-border);
             border-radius: 16px;
             box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.5);
+        }
+
+        .nav-pills .nav-link {
+            color: var(--text-muted);
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-weight: 500;
+        }
+
+        .nav-pills .nav-link.active {
+            background: var(--primary-gradient);
+            color: #fff;
         }
 
         .form-control, .form-select {
@@ -85,23 +94,10 @@
             border-radius: 8px;
         }
 
-        .badge-pending {
-            background: rgba(245, 158, 11, 0.2);
-            color: #fbbf24;
-            border: 1px solid rgba(245, 158, 11, 0.4);
-        }
-
-        .badge-cleared {
-            background: rgba(16, 185, 129, 0.2);
-            color: #34d399;
-            border: 1px solid rgba(16, 185, 129, 0.4);
-        }
-
-        .badge-rejected {
-            background: rgba(244, 63, 94, 0.2);
-            color: #fb7185;
-            border: 1px solid rgba(244, 63, 94, 0.4);
-        }
+        .badge-pending { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4); }
+        .badge-cleared { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); }
+        .badge-rejected { background: rgba(244, 63, 94, 0.2); color: #fb7185; border: 1px solid rgba(244, 63, 94, 0.4); }
+        .badge-role { background: rgba(99, 102, 241, 0.2); color: #818cf8; border: 1px solid rgba(99, 102, 241, 0.4); }
     </style>
 </head>
 <body>
@@ -112,124 +108,293 @@
             <i class="fa-solid fa-boxes-packing text-info me-2"></i> GlobalTrade SCM
         </a>
         <div class="d-flex align-items-center gap-3">
-            <span class="badge bg-dark border border-secondary px-3 py-2"><i class="fa-solid fa-server text-success me-1"></i> WildFly 26 Enterprise</span>
+            <div class="d-flex align-items-center bg-dark border border-secondary px-3 py-1 rounded-3">
+                <i class="fa-solid fa-user-shield text-info me-2"></i>
+                <select id="roleSelector" class="form-select form-select-sm border-0 bg-transparent text-white" onchange="switchRole()">
+                    <option value="LOGISTICS_ADMIN" class="bg-dark" selected>Role: Logistics Admin (All Access)</option>
+                    <option value="VENDOR" class="bg-dark">Role: Vendor (Limited View)</option>
+                    <option value="CUSTOMS_AGENT" class="bg-dark">Role: Customs Agent (Clearance Only)</option>
+                </select>
+            </div>
         </div>
     </div>
 </nav>
 
-<div class="container my-5">
-    <div class="row g-4">
-        <!-- Dispatch Form (CMT JTA) -->
-        <div class="col-lg-5">
-            <div class="glass-card p-4">
-                <h5 class="fw-bold mb-3 text-info"><i class="fa-solid fa-paper-plane me-2"></i>Dispatch Consignment (CMT Atomic)</h5>
-                <p class="text-muted small mb-4">Atomic JTA 2PC Transaction across Inventory and Shipments modules.</p>
+<div class="container my-4">
+    <!-- View Navigation Tabs -->
+    <ul class="nav nav-pills mb-4 gap-2" id="pills-tab" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="pills-shipments-tab" data-bs-toggle="pill" data-bs-target="#pills-shipments" type="button" role="tab">
+                <i class="fa-solid fa-truck-fast me-2"></i>Shipments & Dispatch
+            </button>
+        </li>
+        <li class="nav-item admin-only-tab" role="presentation">
+            <button class="nav-link" id="pills-inventory-tab" data-bs-toggle="pill" data-bs-target="#pills-inventory" type="button" role="tab">
+                <i class="fa-solid fa-warehouse me-2"></i>Warehouse Inventory
+            </button>
+        </li>
+        <li class="nav-item admin-only-tab" role="presentation">
+            <button class="nav-link" id="pills-users-tab" data-bs-toggle="pill" data-bs-target="#pills-users" type="button" role="tab">
+                <i class="fa-solid fa-users-gear me-2"></i>Vendors & Governance
+            </button>
+        </li>
+    </ul>
 
-                <form id="dispatchForm">
-                    <div class="mb-3">
-                        <label class="form-label text-muted small fw-bold">Tracking Number</label>
-                        <input type="text" id="trackNo" class="form-control" placeholder="e.g. TRK-88001" required>
+    <div class="tab-content" id="pills-tabContent">
+
+        <!-- Tab 1: Shipments Management -->
+        <div class="tab-pane fade show active" id="pills-shipments" role="tabpanel">
+            <div class="row g-4">
+                <div class="col-lg-5" id="dispatchCol">
+                    <div class="glass-card p-4">
+                        <h5 class="fw-bold mb-2 text-info"><i class="fa-solid fa-paper-plane me-2"></i>Dispatch Consignment (CMT)</h5>
+                        <p class="text-muted small mb-3">Atomic 2PC JTA Transaction across Inventory and Shipments.</p>
+
+                        <form id="dispatchForm">
+                            <div class="mb-2">
+                                <label class="form-label text-muted small fw-bold">Tracking Number</label>
+                                <input type="text" id="trackNo" class="form-control form-control-sm" placeholder="e.g. TRK-88090" required>
+                            </div>
+                            <div class="row g-2 mb-2">
+                                <div class="col-6">
+                                    <label class="form-label text-muted small fw-bold">Origin</label>
+                                    <input type="text" id="origin" class="form-control form-control-sm" value="Singapore" required>
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label text-muted small fw-bold">Destination</label>
+                                    <input type="text" id="destination" class="form-control form-control-sm" value="Colombo" required>
+                                </div>
+                            </div>
+                            <div class="mb-2">
+                                <label class="form-label text-muted small fw-bold">Payload Weight (kg) <span class="text-danger">(Max: 50,000kg)</span></label>
+                                <input type="number" id="weight" class="form-control form-control-sm" placeholder="52000 triggers Rollback" required>
+                            </div>
+                            <div class="mb-2">
+                                <label class="form-label text-muted small fw-bold">Vendor ID</label>
+                                <select id="vendorSelect" class="form-select form-select-sm" required></select>
+                            </div>
+                            <div class="row g-2 mb-3">
+                                <div class="col-7">
+                                    <label class="form-label text-muted small fw-bold">Inventory Item</label>
+                                    <select id="itemSelect" class="form-select form-select-sm" required></select>
+                                </div>
+                                <div class="col-5">
+                                    <label class="form-label text-muted small fw-bold">Quantity</label>
+                                    <input type="number" id="qty" class="form-control form-control-sm" value="5" min="1" required>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-gradient w-100 py-2">
+                                <i class="fa-solid fa-bolt me-1"></i> Process JTA Transaction
+                            </button>
+                        </form>
+                        <div id="alertPlaceholder" class="mt-3"></div>
                     </div>
+                </div>
 
-                    <div class="row g-2 mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label text-muted small fw-bold">Origin</label>
-                            <input type="text" id="origin" class="form-control" value="Singapore" required>
+                <div class="col-lg-7" id="shipmentGridCol">
+                    <div class="glass-card p-4">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="fw-bold mb-0 text-info"><i class="fa-solid fa-table-list me-2"></i>Active Consignments</h5>
+                            <button class="btn btn-sm btn-outline-info" onclick="loadAllData()"><i class="fa-solid fa-arrows-rotate me-1"></i> Refresh</button>
                         </div>
-                        <div class="col-md-6">
-                            <label class="form-label text-muted small fw-bold">Destination</label>
-                            <input type="text" id="destination" class="form-control" value="Colombo" required>
+                        <div class="table-responsive">
+                            <table class="table table-custom align-middle">
+                                <thead>
+                                <tr class="text-muted small">
+                                    <th>Tracking #</th>
+                                    <th>Route</th>
+                                    <th>Weight</th>
+                                    <th>Status</th>
+                                    <th class="text-end">BMT Action</th>
+                                </tr>
+                                </thead>
+                                <tbody id="shipmentTable"></tbody>
+                            </table>
                         </div>
                     </div>
-
-                    <div class="mb-3">
-                        <label class="form-label text-muted small fw-bold">Payload Weight (kg) <span class="text-danger">(Max: 50,000kg)</span></label>
-                        <input type="number" id="weight" class="form-control" placeholder="52000 triggers Rollback" required>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label text-muted small fw-bold">Vendor ID</label>
-                        <select id="vendorSelect" class="form-select" required>
-                            <option value="">Loading vendors...</option>
-                        </select>
-                    </div>
-
-                    <div class="row g-2 mb-4">
-                        <div class="col-md-7">
-                            <label class="form-label text-muted small fw-bold">Inventory Item</label>
-                            <select id="itemSelect" class="form-select" required>
-                                <option value="">Loading inventory...</option>
-                            </select>
-                        </div>
-                        <div class="col-md-5">
-                            <label class="form-label text-muted small fw-bold">Quantity</label>
-                            <input type="number" id="qty" class="form-control" value="10" min="1" required>
-                        </div>
-                    </div>
-
-                    <button type="submit" class="btn btn-gradient w-100 py-2">
-                        <i class="fa-solid fa-bolt me-1"></i> Process JTA Transaction
-                    </button>
-                </form>
-
-                <div id="alertPlaceholder" class="mt-3"></div>
+                </div>
             </div>
         </div>
 
-        <!-- Real-Time Grid (BMT Actions) -->
-        <div class="col-lg-7">
-            <div class="glass-card p-4">
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <div>
-                        <h5 class="fw-bold mb-0 text-info"><i class="fa-solid fa-table-list me-2"></i>Active Consignments</h5>
-                        <p class="text-muted small mb-0">Customs Clearance Actions (BMT UserTransaction)</p>
+        <!-- Tab 2: Warehouse Inventory Management (Admin Only) -->
+        <div class="tab-pane fade" id="pills-inventory" role="tabpanel">
+            <div class="row g-4">
+                <div class="col-lg-4">
+                    <div class="glass-card p-4">
+                        <h5 class="fw-bold mb-2 text-info"><i class="fa-solid fa-plus-circle me-2"></i>Add Inventory Item</h5>
+                        <p class="text-muted small mb-3">Persist new warehouse stock into MySQL SCM Database.</p>
+                        <form id="addItemForm">
+                            <div class="mb-2">
+                                <label class="form-label text-muted small fw-bold">Item Code</label>
+                                <input type="text" id="newItemCode" class="form-control form-control-sm" placeholder="e.g. ITM-MED-09" required>
+                            </div>
+                            <div class="mb-2">
+                                <label class="form-label text-muted small fw-bold">Item Name</label>
+                                <input type="text" id="newItemName" class="form-control form-control-sm" placeholder="e.g. Surgical Sensors" required>
+                            </div>
+                            <div class="row g-2 mb-3">
+                                <div class="col-6">
+                                    <label class="form-label text-muted small fw-bold">Initial Stock</label>
+                                    <input type="number" id="newQty" class="form-control form-control-sm" value="100" required>
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label text-muted small fw-bold">Threshold</label>
+                                    <input type="number" id="newThreshold" class="form-control form-control-sm" value="20" required>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-gradient w-100 py-2">
+                                <i class="fa-solid fa-floppy-disk me-1"></i> Save to Database
+                            </button>
+                        </form>
+                        <div id="itemAlert" class="mt-3"></div>
                     </div>
-                    <button class="btn btn-sm btn-outline-info" onclick="loadAllData()"><i class="fa-solid fa-arrows-rotate me-1"></i> Refresh</button>
                 </div>
 
-                <div class="table-responsive">
-                    <table class="table table-custom align-middle">
-                        <thead>
-                        <tr class="text-muted small">
-                            <th>Tracking #</th>
-                            <th>Route</th>
-                            <th>Weight</th>
-                            <th>Status</th>
-                            <th class="text-end">BMT Action</th>
-                        </tr>
-                        </thead>
-                        <tbody id="shipmentTable"></tbody>
-                    </table>
+                <div class="col-lg-8">
+                    <div class="glass-card p-4">
+                        <h5 class="fw-bold mb-3 text-info"><i class="fa-solid fa-boxes-stacked me-2"></i>Warehouse Inventory Stock</h5>
+                        <div class="table-responsive">
+                            <table class="table table-custom align-middle">
+                                <thead>
+                                <tr class="text-muted small">
+                                    <th>ID</th>
+                                    <th>Item Code</th>
+                                    <th>Item Name</th>
+                                    <th>Available Stock</th>
+                                    <th>Reorder Threshold</th>
+                                </tr>
+                                </thead>
+                                <tbody id="inventoryFullTable"></tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
+
+        <!-- Tab 3: Users & Vendors Governance (Admin Only) -->
+        <div class="tab-pane fade" id="pills-users" role="tabpanel">
+            <div class="row g-4">
+                <div class="col-lg-4">
+                    <div class="glass-card p-4">
+                        <h5 class="fw-bold mb-2 text-info"><i class="fa-solid fa-user-plus me-2"></i>Register System User</h5>
+                        <p class="text-muted small mb-3">Create role-based identities for Logistics & Vendors.</p>
+                        <form id="addUserForm">
+                            <div class="mb-2">
+                                <label class="form-label text-muted small fw-bold">Username</label>
+                                <input type="text" id="newUsername" class="form-control form-control-sm" placeholder="e.g. vendor_asia" required>
+                            </div>
+                            <div class="mb-2">
+                                <label class="form-label text-muted small fw-bold">Password</label>
+                                <input type="password" id="newPassword" class="form-control form-control-sm" placeholder="••••••••" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label text-muted small fw-bold">Role Assignment</label>
+                                <select id="newRole" class="form-select form-select-sm" required>
+                                    <option value="VENDOR">VENDOR</option>
+                                    <option value="CUSTOMS_AGENT">CUSTOMS_AGENT</option>
+                                    <option value="LOGISTICS_ADMIN">LOGISTICS_ADMIN</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-gradient w-100 py-2">
+                                <i class="fa-solid fa-shield me-1"></i> Create User Entity
+                            </button>
+                        </form>
+                        <div id="userAlert" class="mt-3"></div>
+                    </div>
+                </div>
+
+                <div class="col-lg-8">
+                    <div class="glass-card p-4">
+                        <h5 class="fw-bold mb-3 text-info"><i class="fa-solid fa-users-viewfinder me-2"></i>Registered System Principals</h5>
+                        <div class="table-responsive">
+                            <table class="table table-custom align-middle">
+                                <thead>
+                                <tr class="text-muted small">
+                                    <th>Username</th>
+                                    <th>Security Role</th>
+                                    <th>Access Level</th>
+                                </tr>
+                                </thead>
+                                <tbody id="userFullTable"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     const API = '/scm/api/scm';
 
+    function switchRole() {
+        const role = document.getElementById('roleSelector').value;
+        const adminTabs = document.querySelectorAll('.admin-only-tab');
+        const dispatchCol = document.getElementById('dispatchCol');
+        const shipmentGridCol = document.getElementById('shipmentGridCol');
+
+        if (role === 'LOGISTICS_ADMIN') {
+            adminTabs.forEach(tab => tab.style.display = 'block');
+            dispatchCol.style.display = 'block';
+            shipmentGridCol.className = 'col-lg-7';
+        } else if (role === 'VENDOR') {
+            adminTabs.forEach(tab => tab.style.display = 'none');
+            dispatchCol.style.display = 'none';
+            shipmentGridCol.className = 'col-lg-12';
+            document.getElementById('pills-shipments-tab').click();
+        } else if (role === 'CUSTOMS_AGENT') {
+            adminTabs.forEach(tab => tab.style.display = 'none');
+            dispatchCol.style.display = 'none';
+            shipmentGridCol.className = 'col-lg-12';
+            document.getElementById('pills-shipments-tab').click();
+        }
+    }
+
     async function loadAllData() {
         try {
-            // 1. Fetch Users (Vendors)
+            // 1. Fetch Users
             const userRes = await fetch(`${API}/users`);
             if (userRes.ok) {
                 const users = await userRes.json();
                 const vendorSel = document.getElementById('vendorSelect');
+                const userFullTable = document.getElementById('userFullTable');
                 vendorSel.innerHTML = '';
+                userFullTable.innerHTML = '';
+
                 users.forEach(u => {
                     vendorSel.innerHTML += `<option value="${u.username}">${u.username} (${u.role})</option>`;
+                    userFullTable.innerHTML += `
+                        <tr>
+                            <td><strong class="text-light"><i class="fa-solid fa-user me-2 text-info"></i>${u.username}</strong></td>
+                            <td><span class="badge badge-role px-2 py-1">${u.role}</span></td>
+                            <td class="text-muted small">${u.role === 'LOGISTICS_ADMIN' ? 'Full Read/Write/Rollback' : (u.role === 'CUSTOMS_AGENT' ? 'BMT Clearance Verification' : 'Limited Shipment View')}</td>
+                        </tr>`;
                 });
             }
 
-            // 2. Fetch Inventory Items
+            // 2. Fetch Inventory
             const invRes = await fetch(`${API}/inventory`);
             if (invRes.ok) {
                 const items = await invRes.json();
                 const itemSel = document.getElementById('itemSelect');
+                const invFullTable = document.getElementById('inventoryFullTable');
                 itemSel.innerHTML = '';
+                invFullTable.innerHTML = '';
+
                 items.forEach(i => {
                     itemSel.innerHTML += `<option value="${i.id}">${i.itemName} (Stock: ${i.quantityAvailable})</option>`;
+                    invFullTable.innerHTML += `
+                        <tr>
+                            <td><span class="text-muted">#${i.id}</span></td>
+                            <td><strong class="text-info">${i.itemCode}</strong></td>
+                            <td>${i.itemName}</td>
+                            <td><span class="badge ${i.quantityAvailable <= i.reorderThreshold ? 'badge-rejected' : 'badge-cleared'} px-2 py-1">${i.quantityAvailable} units</span></td>
+                            <td class="text-muted">${i.reorderThreshold} units</td>
+                        </tr>`;
                 });
             }
 
@@ -252,8 +417,8 @@
                             <td>${s.payloadWeight} kg</td>
                             <td><span class="badge ${badgeClass} px-2 py-1">${s.status}</span></td>
                             <td class="text-end">
-                                <button class="btn btn-sm btn-success py-0 px-2 me-1" onclick="handleClearance(${s.id}, true)"><i class="fa-solid fa-check"></i></button>
-                                <button class="btn btn-sm btn-danger py-0 px-2" onclick="handleClearance(${s.id}, false)"><i class="fa-solid fa-xmark"></i></button>
+                                <button class="btn btn-sm btn-success py-0 px-2 me-1" onclick="handleClearance(${s.id}, true)" title="BMT Pass"><i class="fa-solid fa-check"></i></button>
+                                <button class="btn btn-sm btn-danger py-0 px-2" onclick="handleClearance(${s.id}, false)" title="BMT Reject"><i class="fa-solid fa-xmark"></i></button>
                             </td>
                         </tr>`;
                 });
@@ -263,6 +428,7 @@
         }
     }
 
+    // Form 1: Dispatch Consignment (CMT)
     document.getElementById('dispatchForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         const alertBox = document.getElementById('alertPlaceholder');
@@ -286,6 +452,47 @@
         } else {
             const err = await res.json();
             alertBox.innerHTML = `<div class="alert alert-danger py-2 small"><i class="fa-solid fa-triangle-exclamation me-2"></i><strong>Transaction Aborted:</strong> ${err.error}</div>`;
+        }
+    });
+
+    // Form 2: Add Inventory Item (Admin)
+    document.getElementById('addItemForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const code = document.getElementById('newItemCode').value;
+        const name = document.getElementById('newItemName').value;
+        const qty = document.getElementById('newQty').value;
+        const threshold = document.getElementById('newThreshold').value;
+        const alertBox = document.getElementById('itemAlert');
+
+        const res = await fetch(`${API}/inventory?code=${code}&name=${name}&qty=${qty}&threshold=${threshold}`, { method: 'POST' });
+        if (res.ok) {
+            alertBox.innerHTML = '<div class="alert alert-success py-2 small">Item saved to MySQL successfully!</div>';
+            document.getElementById('newItemCode').value = '';
+            document.getElementById('newItemName').value = '';
+            await loadAllData();
+        } else {
+            const err = await res.json();
+            alertBox.innerHTML = `<div class="alert alert-danger py-2 small">${err.error}</div>`;
+        }
+    });
+
+    // Form 3: Register User (Admin)
+    document.getElementById('addUserForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const username = document.getElementById('newUsername').value;
+        const password = document.getElementById('newPassword').value;
+        const role = document.getElementById('newRole').value;
+        const alertBox = document.getElementById('userAlert');
+
+        const res = await fetch(`${API}/users?username=${username}&password=${password}&role=${role}`, { method: 'POST' });
+        if (res.ok) {
+            alertBox.innerHTML = '<div class="alert alert-success py-2 small">User registered successfully!</div>';
+            document.getElementById('newUsername').value = '';
+            document.getElementById('newPassword').value = '';
+            await loadAllData();
+        } else {
+            const err = await res.json();
+            alertBox.innerHTML = `<div class="alert alert-danger py-2 small">${err.error}</div>`;
         }
     });
 
