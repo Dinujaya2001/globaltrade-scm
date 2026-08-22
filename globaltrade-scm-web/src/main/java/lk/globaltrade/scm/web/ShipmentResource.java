@@ -20,13 +20,13 @@ public class ShipmentResource {
     private OrderProcessingService lookupOrderService() {
         try {
             InitialContext ctx = new InitialContext();
-            return (OrderProcessingService) ctx.lookup("java:app/lk.globaltrade-globaltrade-scm-ejb-1.0.0/OrderProcessingService");
+            return (OrderProcessingService) ctx.lookup("java:app/lk.globaltrade-globaltrade-scm-ejb-1.0.0/OrderProcessingService!lk.globaltrade.scm.service.OrderProcessingService");
         } catch (Exception e) {
             try {
                 InitialContext ctx = new InitialContext();
-                return (OrderProcessingService) ctx.lookup("java:global/globaltrade-scm-ear-1.0.0/lk.globaltrade-globaltrade-scm-ejb-1.0.0/OrderProcessingService");
+                return (OrderProcessingService) ctx.lookup("java:global/globaltrade-scm-ear-1.0.0/lk.globaltrade-globaltrade-scm-ejb-1.0.0/OrderProcessingService!lk.globaltrade.scm.service.OrderProcessingService");
             } catch (Exception ex) {
-                throw new RuntimeException("EJB Lookup failed: " + ex.getMessage(), ex);
+                throw new RuntimeException("EJB Lookup failed for OrderProcessingService", ex);
             }
         }
     }
@@ -34,13 +34,13 @@ public class ShipmentResource {
     private CustomsComplianceService lookupCustomsService() {
         try {
             InitialContext ctx = new InitialContext();
-            return (CustomsComplianceService) ctx.lookup("java:app/lk.globaltrade-globaltrade-scm-ejb-1.0.0/CustomsComplianceService");
+            return (CustomsComplianceService) ctx.lookup("java:app/lk.globaltrade-globaltrade-scm-ejb-1.0.0/CustomsComplianceService!lk.globaltrade.scm.service.CustomsComplianceService");
         } catch (Exception e) {
             try {
                 InitialContext ctx = new InitialContext();
-                return (CustomsComplianceService) ctx.lookup("java:global/globaltrade-scm-ear-1.0.0/lk.globaltrade-globaltrade-scm-ejb-1.0.0/CustomsComplianceService");
+                return (CustomsComplianceService) ctx.lookup("java:global/globaltrade-scm-ear-1.0.0/lk.globaltrade-globaltrade-scm-ejb-1.0.0/CustomsComplianceService!lk.globaltrade.scm.service.CustomsComplianceService");
             } catch (Exception ex) {
-                throw new RuntimeException("EJB Lookup failed: " + ex.getMessage(), ex);
+                throw new RuntimeException("EJB Lookup failed for CustomsComplianceService", ex);
             }
         }
     }
@@ -49,11 +49,10 @@ public class ShipmentResource {
     @Path("/inventory")
     public Response getInventory() {
         try {
-            List<InventoryItem> list = lookupOrderService().getAllInventory();
-            return Response.ok(list).build();
+            List<InventoryItem> items = lookupOrderService().getAllInventory();
+            return Response.ok(items).build();
         } catch (Exception e) {
-            e.printStackTrace();
-            return Response.status(500).entity("{\"error\":\"" + e.getMessage() + "\"}").build();
+            return Response.status(500).entity("{\"error\": \"" + e.getMessage() + "\"}").build();
         }
     }
 
@@ -61,11 +60,10 @@ public class ShipmentResource {
     @Path("/users")
     public Response getUsers() {
         try {
-            List<User> list = lookupOrderService().getAllUsers();
-            return Response.ok(list).build();
+            List<User> users = lookupOrderService().getAllUsers();
+            return Response.ok(users).build();
         } catch (Exception e) {
-            e.printStackTrace();
-            return Response.status(500).entity("{\"error\":\"" + e.getMessage() + "\"}").build();
+            return Response.status(500).entity("{\"error\": \"" + e.getMessage() + "\"}").build();
         }
     }
 
@@ -73,11 +71,10 @@ public class ShipmentResource {
     @Path("/shipments")
     public Response getShipments() {
         try {
-            List<Shipment> list = lookupOrderService().getAllShipments();
-            return Response.ok(list).build();
+            List<Shipment> shipments = lookupOrderService().getAllShipments();
+            return Response.ok(shipments).build();
         } catch (Exception e) {
-            e.printStackTrace();
-            return Response.status(500).entity("{\"error\":\"" + e.getMessage() + "\"}").build();
+            return Response.status(500).entity("{\"error\": \"" + e.getMessage() + "\"}").build();
         }
     }
 
@@ -109,7 +106,7 @@ public class ShipmentResource {
             if (success) {
                 return Response.ok("{\"message\": \"Customs verification successfully processed\"}").build();
             }
-            return Response.status(Response.Status.BAD_REQUEST).entity("{\"error\": \"Failed to process clearance\"}").build();
+            return Response.status(Response.Status.BAD_REQUEST).entity("{\"error\": \"Clearance transaction failed\"}").build();
         } catch (Exception ex) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("{\"error\": \"" + ex.getMessage() + "\"}").build();
         }

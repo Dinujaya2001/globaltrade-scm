@@ -3,47 +3,49 @@ package lk.globaltrade.scm.entity;
 import javax.json.bind.annotation.JsonbTransient;
 import javax.persistence.*;
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 @Entity
 @Table(name = "shipments")
 public class Shipment implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "tracking_number", unique = true, nullable = false, length = 100)
+    @Column(name = "tracking_number", nullable = false, unique = true, length = 100)
     private String trackingNumber;
 
-    @Column(name = "origin_country", length = 50)
+    @Column(name = "origin_country", nullable = false, length = 50)
     private String originCountry;
 
-    @Column(name = "destination_country", length = 50)
+    @Column(name = "destination_country", nullable = false, length = 50)
     private String destinationCountry;
 
-    @Column(name = "payload_weight")
+    @Column(name = "payload_weight", nullable = false)
     private double payloadWeight;
 
-    @Column(name = "status", length = 50)
+    @Column(name = "status", nullable = false, length = 50)
     private String status;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "vendor_id", referencedColumnName = "username", nullable = false)
+    @JoinColumn(name = "vendor_id", nullable = false)
     private User vendor;
-
-    @JsonbTransient
-    @OneToMany(mappedBy = "shipment", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    private List<ShipmentItem> items = new ArrayList<>();
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "created_at", insertable = false, updatable = false)
     private Date createdAt;
 
+    @JsonbTransient
+    @OneToMany(mappedBy = "shipment", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<ShipmentItem> shipmentItems;
+
     public Shipment() {}
 
     public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
     public String getTrackingNumber() { return trackingNumber; }
     public void setTrackingNumber(String trackingNumber) { this.trackingNumber = trackingNumber; }
     public String getOriginCountry() { return originCountry; }
@@ -56,7 +58,8 @@ public class Shipment implements Serializable {
     public void setStatus(String status) { this.status = status; }
     public User getVendor() { return vendor; }
     public void setVendor(User vendor) { this.vendor = vendor; }
-    public List<ShipmentItem> getItems() { return items; }
-    public void setItems(List<ShipmentItem> items) { this.items = items; }
     public Date getCreatedAt() { return createdAt; }
+    public void setCreatedAt(Date createdAt) { this.createdAt = createdAt; }
+    public List<ShipmentItem> getShipmentItems() { return shipmentItems; }
+    public void setShipmentItems(List<ShipmentItem> shipmentItems) { this.shipmentItems = shipmentItems; }
 }

@@ -31,7 +31,7 @@ public class AuditTrail implements Serializable {
     @Column(name = "logged_at", insertable = false, updatable = false)
     private Date loggedAt = new Date();
 
-    public AuditTrail() {}
+    public AuditTrail(String caller, String className, String methodName, long executionTime, String status) {}
     public AuditTrail(User executedBy, String serviceName, String methodName, Long executionTimeMs, String status) {
         this.executedBy = executedBy;
         this.serviceName = serviceName;

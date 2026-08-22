@@ -1,41 +1,55 @@
 package lk.globaltrade.scm.interceptor;
 
 import lk.globaltrade.scm.entity.AuditTrail;
-import lk.globaltrade.scm.entity.User;
-
+import javax.annotation.Resource;
+import javax.ejb.SessionContext;
 import javax.interceptor.AroundInvoke;
 import javax.interceptor.InvocationContext;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import java.io.Serializable;
 import java.util.logging.Logger;
 
-public class LogisticsAuditInterceptor {
+public class LogisticsAuditInterceptor implements Serializable {
     private static final Logger LOGGER = Logger.getLogger(LogisticsAuditInterceptor.class.getName());
 
     @PersistenceContext(unitName = "SCMPU")
     private EntityManager em;
 
+    @Resource
+    private SessionContext sessionContext;
+
     @AroundInvoke
-    public Object interceptCall(InvocationContext ctx) throws Exception {
-        long start = System.currentTimeMillis();
-        String method = ctx.getMethod().getName();
-        String service = ctx.getTarget().getClass().getSimpleName();
-        String status = "SUCCESS";
+    public Object auditMethodInvocation(InvocationContext context) throws Exception {
+        long startTime = System.currentTimeMillis();
+        String className = context.getTarget().getClass().getSimpleName();
+        String methodName = context.getMethod().getName();
+        String caller = "ANONYMOUS_CLIENT";
 
         try {
-            return ctx.proceed();
+            if (sessionContext != null && sessionContext.getCallerPrincipal() != null) {
+                caller = sessionContext.getCallerPrincipal().getName();
+            }
+        } catch (Exception ignored) {}
+
+        Object result;
+        String status = "SUCCESS";
+        try {
+            result = context.proceed();
+            return result;
         } catch (Exception ex) {
             status = "FAILED: " + ex.getMessage();
             throw ex;
         } finally {
-            long executionTime = System.currentTimeMillis() - start;
-            LOGGER.info("[AUDIT INTERCEPTOR] " + service + " -> " + method + " executed in " + executionTime + "ms");
+            long executionTime = System.currentTimeMillis() - startTime;
+            LOGGER.info(String.format("[AUDIT INTERCEPTOR] %s -> %s executed in %dms | Status: %s",
+                    className, methodName, executionTime, status));
+
             try {
-                User defaultUser = em.find(User.class, "admin_user");
-                AuditTrail audit = new AuditTrail(defaultUser, service, method, executionTime, status);
-                em.persist(audit);
+                AuditTrail log = new AuditTrail(caller, className, methodName, executionTime, status);
+                em.persist(log);
             } catch (Exception e) {
-                LOGGER.warning("Audit persistence bypassed: " + e.getMessage());
+                LOGGER.fine("Read-only invocation - audit log skipped to preserve isolation.");
             }
         }
     }

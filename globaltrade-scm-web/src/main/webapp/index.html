@@ -3,86 +3,199 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GlobalTrade SCM Portal</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>GlobalTrade Logistics - Enterprise SCM Modernization Portal</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body { background: #f0f2f5; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        .header { background: #0f172a; color: white; padding: 20px 0; margin-bottom: 30px; }
-        .card { border-radius: 10px; border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        :root {
+            --primary-gradient: linear-gradient(135deg, #0ea5e9 0%, #3b82f6 50%, #6366f1 100%);
+            --dark-bg: #0b1120;
+            --card-bg: rgba(15, 23, 42, 0.75);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent-cyan: #38bdf8;
+            --accent-emerald: #10b981;
+            --accent-rose: #f43f5e;
+        }
+
+        body {
+            background-color: var(--dark-bg);
+            color: var(--text-main);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            min-height: 100vh;
+            background-image:
+                    radial-gradient(at 0% 0%, rgba(14, 165, 233, 0.15) 0px, transparent 50%),
+                    radial-gradient(at 100% 100%, rgba(99, 102, 241, 0.15) 0px, transparent 50%);
+            background-attachment: fixed;
+        }
+
+        .navbar-custom {
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        .glass-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.5);
+        }
+
+        .form-control, .form-select {
+            background-color: rgba(30, 41, 59, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: #fff;
+            border-radius: 8px;
+        }
+
+        .form-control:focus, .form-select:focus {
+            background-color: rgba(30, 41, 59, 0.9);
+            border-color: #38bdf8;
+            color: #fff;
+            box-shadow: 0 0 0 0.25rem rgba(56, 189, 248, 0.25);
+        }
+
+        .btn-gradient {
+            background: var(--primary-gradient);
+            border: none;
+            color: #fff;
+            font-weight: 600;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-gradient:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(14, 165, 233, 0.4);
+            color: #fff;
+        }
+
+        .table-custom {
+            color: var(--text-main);
+            border-collapse: separate;
+            border-spacing: 0 8px;
+        }
+
+        .table-custom tr {
+            background: rgba(30, 41, 59, 0.4);
+            border-radius: 8px;
+        }
+
+        .badge-pending {
+            background: rgba(245, 158, 11, 0.2);
+            color: #fbbf24;
+            border: 1px solid rgba(245, 158, 11, 0.4);
+        }
+
+        .badge-cleared {
+            background: rgba(16, 185, 129, 0.2);
+            color: #34d399;
+            border: 1px solid rgba(16, 185, 129, 0.4);
+        }
+
+        .badge-rejected {
+            background: rgba(244, 63, 94, 0.2);
+            color: #fb7185;
+            border: 1px solid rgba(244, 63, 94, 0.4);
+        }
     </style>
 </head>
 <body>
 
-<div class="header">
+<nav class="navbar navbar-expand-lg navbar-custom sticky-top py-3">
     <div class="container">
-        <h3>GlobalTrade Logistics Corporation</h3>
-        <p class="mb-0 text-muted">Jakarta/Java EE Enterprise Supply Chain Modernization Dashboard</p>
+        <a class="navbar-brand d-flex align-items-center text-white fw-bold fs-4" href="#">
+            <i class="fa-solid fa-boxes-packing text-info me-2"></i> GlobalTrade SCM
+        </a>
+        <div class="d-flex align-items-center gap-3">
+            <span class="badge bg-dark border border-secondary px-3 py-2"><i class="fa-solid fa-server text-success me-1"></i> WildFly 26 Enterprise</span>
+        </div>
     </div>
-</div>
+</nav>
 
-<div class="container">
-    <div class="row mb-4">
-        <!-- Register Shipment Card -->
+<div class="container my-5">
+    <div class="row g-4">
+        <!-- Dispatch Form (CMT JTA) -->
         <div class="col-lg-5">
-            <div class="card p-4">
-                <h5 class="card-title text-primary mb-3">Dispatch Shipment (CMT Atomic)</h5>
-                <form id="scmForm">
-                    <div class="mb-2">
-                        <label for="trackNo" class="form-label">Tracking Number</label>
-                        <input type="text" id="trackNo" class="form-control form-control-sm" placeholder="e.g. TRK-88001" required>
+            <div class="glass-card p-4">
+                <h5 class="fw-bold mb-3 text-info"><i class="fa-solid fa-paper-plane me-2"></i>Dispatch Consignment (CMT Atomic)</h5>
+                <p class="text-muted small mb-4">Atomic JTA 2PC Transaction across Inventory and Shipments modules.</p>
+
+                <form id="dispatchForm">
+                    <div class="mb-3">
+                        <label class="form-label text-muted small fw-bold">Tracking Number</label>
+                        <input type="text" id="trackNo" class="form-control" placeholder="e.g. TRK-88001" required>
                     </div>
-                    <div class="row">
-                        <div class="col-md-6 mb-2">
-                            <label for="origin" class="form-label">Origin</label>
-                            <input type="text" id="origin" class="form-control form-control-sm" value="Singapore" required>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label text-muted small fw-bold">Origin</label>
+                            <input type="text" id="origin" class="form-control" value="Singapore" required>
                         </div>
-                        <div class="col-md-6 mb-2">
-                            <label for="destination" class="form-label">Destination</label>
-                            <input type="text" id="destination" class="form-control form-control-sm" value="Colombo" required>
+                        <div class="col-md-6">
+                            <label class="form-label text-muted small fw-bold">Destination</label>
+                            <input type="text" id="destination" class="form-control" value="Colombo" required>
                         </div>
                     </div>
-                    <div class="mb-2">
-                        <label for="weight" class="form-label">Payload Weight (kg) <small class="text-danger">(Max: 50000kg)</small></label>
-                        <input type="number" id="weight" class="form-control form-control-sm" placeholder="52000 triggers Rollback" required>
+
+                    <div class="mb-3">
+                        <label class="form-label text-muted small fw-bold">Payload Weight (kg) <span class="text-danger">(Max: 50,000kg)</span></label>
+                        <input type="number" id="weight" class="form-control" placeholder="52000 triggers Rollback" required>
                     </div>
-                    <div class="mb-2">
-                        <label for="vendor" class="form-label">Vendor ID</label>
-                        <select id="vendor" class="form-select form-select-sm" required>
+
+                    <div class="mb-3">
+                        <label class="form-label text-muted small fw-bold">Vendor ID</label>
+                        <select id="vendorSelect" class="form-select" required>
                             <option value="">Loading vendors...</option>
                         </select>
                     </div>
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="itemSelect" class="form-label">Inventory Item</label>
-                            <select id="itemSelect" class="form-select form-select-sm"></select>
+
+                    <div class="row g-2 mb-4">
+                        <div class="col-md-7">
+                            <label class="form-label text-muted small fw-bold">Inventory Item</label>
+                            <select id="itemSelect" class="form-select" required>
+                                <option value="">Loading inventory...</option>
+                            </select>
                         </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="qty" class="form-label">Quantity</label>
-                            <input type="number" id="qty" class="form-control form-control-sm" value="10" required>
+                        <div class="col-md-5">
+                            <label class="form-label text-muted small fw-bold">Quantity</label>
+                            <input type="number" id="qty" class="form-control" value="10" min="1" required>
                         </div>
                     </div>
-                    <button type="submit" class="btn btn-primary btn-sm w-100">Process Transaction</button>
+
+                    <button type="submit" class="btn btn-gradient w-100 py-2">
+                        <i class="fa-solid fa-bolt me-1"></i> Process JTA Transaction
+                    </button>
                 </form>
-                <div id="statusAlert" class="mt-3"></div>
+
+                <div id="alertPlaceholder" class="mt-3"></div>
             </div>
         </div>
 
-        <!-- Real-time Grid -->
+        <!-- Real-Time Grid (BMT Actions) -->
         <div class="col-lg-7">
-            <div class="card p-4">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h5 class="card-title text-primary mb-0">Active SCM Consignments</h5>
-                    <button class="btn btn-sm btn-outline-secondary" onclick="loadData()">Refresh</button>
+            <div class="glass-card p-4">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h5 class="fw-bold mb-0 text-info"><i class="fa-solid fa-table-list me-2"></i>Active Consignments</h5>
+                        <p class="text-muted small mb-0">Customs Clearance Actions (BMT UserTransaction)</p>
+                    </div>
+                    <button class="btn btn-sm btn-outline-info" onclick="loadAllData()"><i class="fa-solid fa-arrows-rotate me-1"></i> Refresh</button>
                 </div>
+
                 <div class="table-responsive">
-                    <table class="table table-hover align-middle">
-                        <thead class="table-dark">
-                        <tr>
+                    <table class="table table-custom align-middle">
+                        <thead>
+                        <tr class="text-muted small">
                             <th>Tracking #</th>
                             <th>Route</th>
                             <th>Weight</th>
                             <th>Status</th>
-                            <th>BMT Action</th>
+                            <th class="text-end">BMT Action</th>
                         </tr>
                         </thead>
                         <tbody id="shipmentTable"></tbody>
@@ -96,93 +209,92 @@
 <script>
     const API = '/scm/api/scm';
 
-    async function loadData() {
+    async function loadAllData() {
         try {
-            // 1. Load Vendors from Database
+            // 1. Fetch Users (Vendors)
             const userRes = await fetch(`${API}/users`);
             if (userRes.ok) {
-                const userData = await userRes.json();
-                const vendorSel = document.getElementById('vendor');
+                const users = await userRes.json();
+                const vendorSel = document.getElementById('vendorSelect');
                 vendorSel.innerHTML = '';
-                userData.forEach(u => {
+                users.forEach(u => {
                     vendorSel.innerHTML += `<option value="${u.username}">${u.username} (${u.role})</option>`;
                 });
             }
 
-            // 2. Load Inventory from Database
+            // 2. Fetch Inventory Items
             const invRes = await fetch(`${API}/inventory`);
             if (invRes.ok) {
-                const invData = await invRes.json();
+                const items = await invRes.json();
                 const itemSel = document.getElementById('itemSelect');
                 itemSel.innerHTML = '';
-                invData.forEach(i => {
+                items.forEach(i => {
                     itemSel.innerHTML += `<option value="${i.id}">${i.itemName} (Stock: ${i.quantityAvailable})</option>`;
                 });
             }
 
-            // 3. Load Shipments from Database
+            // 3. Fetch Shipments
             const shipRes = await fetch(`${API}/shipments`);
             if (shipRes.ok) {
-                const shipData = await shipRes.json();
+                const shipments = await shipRes.json();
                 const tbody = document.getElementById('shipmentTable');
                 tbody.innerHTML = '';
-                if (shipData.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">No shipments found.</td></tr>';
+                if (shipments.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-4">No consignments found.</td></tr>';
                     return;
                 }
-                shipData.forEach(s => {
+                shipments.forEach(s => {
+                    let badgeClass = s.status === 'PENDING' ? 'badge-pending' : (s.status === 'CUSTOMS_CLEARED' ? 'badge-cleared' : 'badge-rejected');
                     tbody.innerHTML += `
-                    <tr>
-                        <td><strong>${s.trackingNumber}</strong></td>
-                        <td>${s.originCountry} &rarr; ${s.destinationCountry}</td>
-                        <td>${s.payloadWeight} kg</td>
-                        <td><span class="badge bg-${s.status === 'PENDING' ? 'warning' : 'success'}">${s.status}</span></td>
-                        <td>
-                            <button class="btn btn-sm btn-success py-0" onclick="clearance(${s.id}, true)">Pass</button>
-                            <button class="btn btn-sm btn-danger py-0" onclick="clearance(${s.id}, false)">Reject</button>
-                        </td>
-                    </tr>`;
+                        <tr>
+                            <td><strong class="text-light">${s.trackingNumber}</strong></td>
+                            <td>${s.originCountry} &rarr; ${s.destinationCountry}</td>
+                            <td>${s.payloadWeight} kg</td>
+                            <td><span class="badge ${badgeClass} px-2 py-1">${s.status}</span></td>
+                            <td class="text-end">
+                                <button class="btn btn-sm btn-success py-0 px-2 me-1" onclick="handleClearance(${s.id}, true)"><i class="fa-solid fa-check"></i></button>
+                                <button class="btn btn-sm btn-danger py-0 px-2" onclick="handleClearance(${s.id}, false)"><i class="fa-solid fa-xmark"></i></button>
+                            </td>
+                        </tr>`;
                 });
             }
         } catch (e) {
-            console.error('Error fetching data:', e);
+            console.error('Error loading data:', e);
         }
     }
 
-    document.getElementById('scmForm').addEventListener('submit', async (e) => {
+    document.getElementById('dispatchForm').addEventListener('submit', async (e) => {
         e.preventDefault();
-        const trackNo = document.getElementById('trackNo').value;
-        const origin = document.getElementById('origin').value;
-        const destination = document.getElementById('destination').value;
-        const weight = document.getElementById('weight').value;
-        const vendor = document.getElementById('vendor').value;
-        const itemId = document.getElementById('itemSelect').value;
+        const alertBox = document.getElementById('alertPlaceholder');
+        alertBox.innerHTML = '<div class="alert alert-info py-2 small"><i class="fa-solid fa-spinner fa-spin me-2"></i>Executing 2PC JTA Transaction...</div>';
+
+        const tNo = document.getElementById('trackNo').value;
+        const org = document.getElementById('origin').value;
+        const dst = document.getElementById('destination').value;
+        const wgt = document.getElementById('weight').value;
+        const ven = document.getElementById('vendorSelect').value;
+        const itm = document.getElementById('itemSelect').value;
         const qty = document.getElementById('qty').value;
 
-        const alertBox = document.getElementById('statusAlert');
-        alertBox.innerHTML = '<div class="alert alert-info py-2">Executing 2PC JTA Transaction...</div>';
-
-        const url = `${API}/shipments?trackingNo=${trackNo}&origin=${origin}&destination=${destination}&weight=${weight}&vendor=${vendor}&itemId=${itemId}&qty=${qty}`;
-        const res = await fetch(url, { method: 'POST' });
+        const res = await fetch(`${API}/shipments?trackingNo=${tNo}&origin=${org}&destination=${dst}&weight=${wgt}&vendor=${ven}&itemId=${itm}&qty=${qty}`, { method: 'POST' });
 
         if (res.ok) {
-            alertBox.innerHTML = '<div class="alert alert-success py-2">Consignment Dispatched & SLA Timer Started!</div>';
-            document.getElementById('scmForm').reset();
-            await loadData();
+            alertBox.innerHTML = '<div class="alert alert-success py-2 small"><i class="fa-solid fa-circle-check me-2"></i>Consignment Dispatched & SLA Timer Started!</div>';
+            document.getElementById('trackNo').value = '';
+            document.getElementById('weight').value = '';
+            await loadAllData();
         } else {
             const err = await res.json();
-            alertBox.innerHTML = `<div class="alert alert-danger py-2"><strong>Transaction Aborted:</strong> ${err.error}</div>`;
+            alertBox.innerHTML = `<div class="alert alert-danger py-2 small"><i class="fa-solid fa-triangle-exclamation me-2"></i><strong>Transaction Aborted:</strong> ${err.error}</div>`;
         }
     });
 
-    async function clearance(id, status) {
-        await fetch(`${API}/shipments/${id}/clearance?approved=${status}`, { method: 'POST' });
-        await loadData();
+    async function handleClearance(id, approved) {
+        await fetch(`${API}/shipments/${id}/clearance?approved=${approved}`, { method: 'POST' });
+        await loadAllData();
     }
 
-    window.addEventListener('DOMContentLoaded', async () => {
-        await loadData();
-    });
+    window.addEventListener('DOMContentLoaded', loadAllData);
 </script>
 </body>
 </html>

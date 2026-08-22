@@ -6,11 +6,13 @@ import java.io.Serializable;
 @Entity
 @Table(name = "inventory_items")
 public class InventoryItem implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "item_code", unique = true, nullable = false, length = 50)
+    @Column(name = "item_code", nullable = false, unique = true, length = 50)
     private String itemCode;
 
     @Column(name = "item_name", nullable = false, length = 100)
@@ -25,6 +27,7 @@ public class InventoryItem implements Serializable {
     public InventoryItem() {}
 
     public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
     public String getItemCode() { return itemCode; }
     public void setItemCode(String itemCode) { this.itemCode = itemCode; }
     public String getItemName() { return itemName; }

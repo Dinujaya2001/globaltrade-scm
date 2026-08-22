@@ -15,6 +15,7 @@ import java.io.Serializable;
 
 @Stateful
 @LocalBean
+@PermitAll
 @TransactionManagement(TransactionManagementType.BEAN)
 public class CustomsComplianceService implements Serializable {
 
@@ -24,7 +25,6 @@ public class CustomsComplianceService implements Serializable {
     @Resource
     private UserTransaction userTx;
 
-    @PermitAll
     public boolean updateCustomsClearance(Long shipmentId, boolean approved) {
         try {
             userTx.begin();
