@@ -1,34 +1,57 @@
 package lk.globaltrade.scm.timer;
 
+import lk.globaltrade.scm.entity.Shipment;
+
 import javax.annotation.Resource;
-import javax.ejb.*;
+import javax.ejb.LocalBean;
+import javax.ejb.Stateless;
+import javax.ejb.Timeout;
+import javax.ejb.Timer;
+import javax.ejb.TimerConfig;
+import javax.ejb.TimerService;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import java.io.Serializable;
+import java.util.List;
 import java.util.logging.Logger;
 
-@Singleton
-@Startup
-public class AutomatedTrackingTimerService {
+@Stateless
+@LocalBean
+public class AutomatedTrackingTimerService implements Serializable {
     private static final Logger LOGGER = Logger.getLogger(AutomatedTrackingTimerService.class.getName());
 
     @Resource
     private TimerService timerService;
 
-    // Declarative Persistent Timer
-    @Schedule(hour = "2", minute = "0", second = "0", persistent = true, info = "DailyInventoryReconciliation")
-    public void runNightlyRebalancing() {
-        LOGGER.info("[DECLARATIVE TIMER] Executing 2:00 AM Automated SCM Inventory Sync...");
-    }
+    @PersistenceContext(unitName = "SCMPU")
+    private EntityManager em;
 
-    // Programmatic Dynamic SLA Monitor
-    public void registerSlaMonitor(String trackingNumber, long delayMillis) {
+    public void registerSlaMonitor(String trackingNumber, long durationMs) {
         TimerConfig config = new TimerConfig(trackingNumber, false);
-        timerService.createSingleActionTimer(delayMillis, config);
-        LOGGER.info("[PROGRAMMATIC TIMER] SLA Timer registered for Shipment: " + trackingNumber);
+        timerService.createSingleActionTimer(durationMs, config);
+        LOGGER.info("[TIMER REGISTERED] SLA deadline armed for " + trackingNumber + " (" + durationMs + "ms)");
     }
 
     @Timeout
-    public void onTimeout(Timer timer) {
-        Serializable trackingNum = timer.getInfo();
-        LOGGER.warning("[SLA VIOLATION ALERT] Cargo Scan Deadline Breached for Tracking #: " + trackingNum);
+    public void onSlaBreach(Timer timer) {
+        String trackingNo = (String) timer.getInfo();
+        LOGGER.warning("[SLA VIOLATION ALERT] Cargo Scan Deadline Breached for Tracking #: " + trackingNo);
+
+        try {
+            List<Shipment> list = em.createQuery("SELECT s FROM Shipment s WHERE s.trackingNumber = :trk", Shipment.class)
+                    .setParameter("trk", trackingNo)
+                    .getResultList();
+
+            if (!list.isEmpty()) {
+                Shipment shipment = list.get(0);
+                if ("PENDING".equalsIgnoreCase(shipment.getStatus())) {
+                    shipment.setStatus("SLA_BREACHED");
+                    em.merge(shipment);
+                    LOGGER.warning("[SLA DATABASE SYNC] Shipment " + trackingNo + " marked as SLA_BREACHED in MySQL");
+                }
+            }
+        } catch (Exception ex) {
+            LOGGER.severe("Failed to update SLA breach state: " + ex.getMessage());
+        }
     }
 }

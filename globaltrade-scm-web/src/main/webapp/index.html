@@ -98,6 +98,19 @@
         .badge-cleared { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); }
         .badge-rejected { background: rgba(244, 63, 94, 0.2); color: #fb7185; border: 1px solid rgba(244, 63, 94, 0.4); }
         .badge-role { background: rgba(99, 102, 241, 0.2); color: #818cf8; border: 1px solid rgba(99, 102, 241, 0.4); }
+
+        .badge-sla-breached {
+            background: rgba(239, 68, 68, 0.25);
+            color: #f87171;
+            border: 1px solid #ef4444;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            70% { transform: scale(1.03); box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
     </style>
 </head>
 <body>
@@ -339,83 +352,101 @@
 
         if (role === 'LOGISTICS_ADMIN') {
             adminTabs.forEach(tab => tab.style.display = 'block');
-            dispatchCol.style.display = 'block';
-            shipmentGridCol.className = 'col-lg-7';
-        } else if (role === 'VENDOR') {
+            if (dispatchCol) dispatchCol.style.display = 'block';
+            if (shipmentGridCol) shipmentGridCol.className = 'col-lg-7';
+        } else {
             adminTabs.forEach(tab => tab.style.display = 'none');
-            dispatchCol.style.display = 'none';
-            shipmentGridCol.className = 'col-lg-12';
-            document.getElementById('pills-shipments-tab').click();
-        } else if (role === 'CUSTOMS_AGENT') {
-            adminTabs.forEach(tab => tab.style.display = 'none');
-            dispatchCol.style.display = 'none';
-            shipmentGridCol.className = 'col-lg-12';
-            document.getElementById('pills-shipments-tab').click();
+            if (dispatchCol) dispatchCol.style.display = 'none';
+            if (shipmentGridCol) shipmentGridCol.className = 'col-lg-12';
+            const defaultTab = document.getElementById('pills-shipments-tab');
+            if (defaultTab) defaultTab.click();
         }
     }
 
     async function loadAllData() {
         try {
-            // 1. Fetch Users
+            // 1. Fetch Users (Vendors & Governance)
             const userRes = await fetch(`${API}/users`);
             if (userRes.ok) {
                 const users = await userRes.json();
                 const vendorSel = document.getElementById('vendorSelect');
                 const userFullTable = document.getElementById('userFullTable');
-                vendorSel.innerHTML = '';
-                userFullTable.innerHTML = '';
+                if (vendorSel) vendorSel.innerHTML = '';
+                if (userFullTable) userFullTable.innerHTML = '';
 
                 users.forEach(u => {
-                    vendorSel.innerHTML += `<option value="${u.username}">${u.username} (${u.role})</option>`;
-                    userFullTable.innerHTML += `
-                        <tr>
-                            <td><strong class="text-light"><i class="fa-solid fa-user me-2 text-info"></i>${u.username}</strong></td>
-                            <td><span class="badge badge-role px-2 py-1">${u.role}</span></td>
-                            <td class="text-muted small">${u.role === 'LOGISTICS_ADMIN' ? 'Full Read/Write/Rollback' : (u.role === 'CUSTOMS_AGENT' ? 'BMT Clearance Verification' : 'Limited Shipment View')}</td>
-                        </tr>`;
+                    if (vendorSel) {
+                        vendorSel.innerHTML += `<option value="${u.username}">${u.username} (${u.role})</option>`;
+                    }
+                    if (userFullTable) {
+                        userFullTable.innerHTML += `
+                            <tr>
+                                <td><strong class="text-light"><i class="fa-solid fa-user me-2 text-info"></i>${u.username}</strong></td>
+                                <td><span class="badge badge-role px-2 py-1">${u.role}</span></td>
+                                <td class="text-muted small">${u.role === 'LOGISTICS_ADMIN' ? 'Full Read/Write/Rollback' : (u.role === 'CUSTOMS_AGENT' ? 'BMT Clearance Verification' : 'Limited Shipment View')}</td>
+                            </tr>`;
+                    }
                 });
             }
 
-            // 2. Fetch Inventory
+            // 2. Fetch Warehouse Inventory Stock
             const invRes = await fetch(`${API}/inventory`);
             if (invRes.ok) {
                 const items = await invRes.json();
                 const itemSel = document.getElementById('itemSelect');
                 const invFullTable = document.getElementById('inventoryFullTable');
-                itemSel.innerHTML = '';
-                invFullTable.innerHTML = '';
+                if (itemSel) itemSel.innerHTML = '';
+                if (invFullTable) invFullTable.innerHTML = '';
 
                 items.forEach(i => {
-                    itemSel.innerHTML += `<option value="${i.id}">${i.itemName} (Stock: ${i.quantityAvailable})</option>`;
-                    invFullTable.innerHTML += `
-                        <tr>
-                            <td><span class="text-muted">#${i.id}</span></td>
-                            <td><strong class="text-info">${i.itemCode}</strong></td>
-                            <td>${i.itemName}</td>
-                            <td><span class="badge ${i.quantityAvailable <= i.reorderThreshold ? 'badge-rejected' : 'badge-cleared'} px-2 py-1">${i.quantityAvailable} units</span></td>
-                            <td class="text-muted">${i.reorderThreshold} units</td>
-                        </tr>`;
+                    if (itemSel) {
+                        itemSel.innerHTML += `<option value="${i.id}">${i.itemName} (Stock: ${i.quantityAvailable})</option>`;
+                    }
+                    if (invFullTable) {
+                        invFullTable.innerHTML += `
+                            <tr>
+                                <td><span class="text-muted">#${i.id}</span></td>
+                                <td><strong class="text-info">${i.itemCode}</strong></td>
+                                <td>${i.itemName}</td>
+                                <td><span class="badge ${i.quantityAvailable <= i.reorderThreshold ? 'badge-rejected' : 'badge-cleared'} px-2 py-1">${i.quantityAvailable} units</span></td>
+                                <td class="text-muted">${i.reorderThreshold} units</td>
+                            </tr>`;
+                    }
                 });
             }
 
-            // 3. Fetch Shipments
+            // 3. Fetch Active Consignments (Shipments & Live SLA Tracking)
             const shipRes = await fetch(`${API}/shipments`);
             if (shipRes.ok) {
                 const shipments = await shipRes.json();
                 const tbody = document.getElementById('shipmentTable');
+                if (!tbody) return;
                 tbody.innerHTML = '';
+
                 if (shipments.length === 0) {
                     tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-4">No consignments found.</td></tr>';
                     return;
                 }
+
                 shipments.forEach(s => {
-                    let badgeClass = s.status === 'PENDING' ? 'badge-pending' : (s.status === 'CUSTOMS_CLEARED' ? 'badge-cleared' : 'badge-rejected');
+                    let badgeClass = 'badge-pending';
+                    let statusText = s.status;
+
+                    if (s.status === 'CUSTOMS_CLEARED') {
+                        badgeClass = 'badge-cleared';
+                    } else if (s.status === 'CUSTOMS_REJECTED') {
+                        badgeClass = 'badge-rejected';
+                    } else if (s.status === 'SLA_BREACHED') {
+                        badgeClass = 'badge-sla-breached';
+                        statusText = '<i class="fa-solid fa-triangle-exclamation me-1"></i> SLA BREACHED';
+                    }
+
                     tbody.innerHTML += `
                         <tr>
                             <td><strong class="text-light">${s.trackingNumber}</strong></td>
                             <td>${s.originCountry} &rarr; ${s.destinationCountry}</td>
                             <td>${s.payloadWeight} kg</td>
-                            <td><span class="badge ${badgeClass} px-2 py-1">${s.status}</span></td>
+                            <td><span class="badge ${badgeClass} px-2 py-1">${statusText}</span></td>
                             <td class="text-end">
                                 <button class="btn btn-sm btn-success py-0 px-2 me-1" onclick="handleClearance(${s.id}, true)" title="BMT Pass"><i class="fa-solid fa-check"></i></button>
                                 <button class="btn btn-sm btn-danger py-0 px-2" onclick="handleClearance(${s.id}, false)" title="BMT Reject"><i class="fa-solid fa-xmark"></i></button>
@@ -428,7 +459,7 @@
         }
     }
 
-    // Form 1: Dispatch Consignment (CMT)
+    // Form 1: Dispatch Consignment (CMT JTA Transaction)
     document.getElementById('dispatchForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         const alertBox = document.getElementById('alertPlaceholder');
@@ -455,7 +486,7 @@
         }
     });
 
-    // Form 2: Add Inventory Item (Admin)
+    // Form 2: Add Inventory Item (Admin Action)
     document.getElementById('addItemForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         const code = document.getElementById('newItemCode').value;
@@ -476,7 +507,7 @@
         }
     });
 
-    // Form 3: Register User (Admin)
+    // Form 3: Register System User (Admin Action)
     document.getElementById('addUserForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         const username = document.getElementById('newUsername').value;
@@ -496,12 +527,17 @@
         }
     });
 
+    // BMT Action: Customs Clearance Pass / Reject
     async function handleClearance(id, approved) {
         await fetch(`${API}/shipments/${id}/clearance?approved=${approved}`, { method: 'POST' });
         await loadAllData();
     }
 
+    // Initial load when page opens
     window.addEventListener('DOMContentLoaded', loadAllData);
+
+    // Auto-refresh grid every 5 seconds for live SLA monitoring
+    setInterval(loadAllData, 5000);
 </script>
 </body>
 </html>
