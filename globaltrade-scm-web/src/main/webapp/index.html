@@ -3,227 +3,448 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GlobalTrade Logistics - Enterprise SCM Management Portal</title>
+    <title>GlobalTrade Logistics Portal</title>
+    <!-- Modern Typography & Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@600;700&display=swap" rel="stylesheet">
+
     <style>
         :root {
-            --primary-gradient: linear-gradient(135deg, #0ea5e9 0%, #3b82f6 50%, #6366f1 100%);
-            --dark-bg: #0b1120;
-            --card-bg: rgba(15, 23, 42, 0.75);
-            --card-border: rgba(255, 255, 255, 0.08);
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
+            --bg-canvas: #0b1120;
+            --card-surface: #131d31;
+            --card-surface-elevated: #1e293b;
+            --border-line: rgba(255, 255, 255, 0.15);
+
+            --text-pure: #ffffff;
+            --text-highlight: #38bdf8;
+            --text-sub: #cbd5e1;
+            --text-dim: #94a3b8;
+
+            --color-primary: #2563eb;
+            --color-primary-hover: #1d4ed8;
+            --color-success: #10b981;
+            --color-danger: #ef4444;
+            --color-warning: #f59e0b;
         }
 
         body {
-            background-color: var(--dark-bg);
-            color: var(--text-main);
-            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-canvas);
+            color: var(--text-pure);
+            font-family: 'Inter', -apple-system, sans-serif;
             min-height: 100vh;
             background-image:
-                    radial-gradient(at 0% 0%, rgba(14, 165, 233, 0.15) 0px, transparent 50%),
-                    radial-gradient(at 100% 100%, rgba(99, 102, 241, 0.15) 0px, transparent 50%);
+                    radial-gradient(at 0% 0%, rgba(37, 99, 235, 0.15) 0px, transparent 40%),
+                    radial-gradient(at 100% 100%, rgba(56, 189, 248, 0.1) 0px, transparent 40%);
             background-attachment: fixed;
         }
 
-        .navbar-custom {
-            background: rgba(15, 23, 42, 0.85);
-            backdrop-filter: blur(16px);
-            border-bottom: 1px solid var(--card-border);
+        .mono { font-family: 'JetBrains Mono', monospace; }
+
+        /* Header & Logo */
+        .app-header {
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-line);
         }
 
-        .glass-card {
-            background: var(--card-bg);
-            backdrop-filter: blur(16px);
-            border: 1px solid var(--card-border);
-            border-radius: 16px;
-            box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.5);
+        .brand-logo-img {
+            height: 42px;
+            width: auto;
+            object-fit: contain;
         }
 
-        .nav-pills .nav-link {
-            color: var(--text-muted);
-            border-radius: 8px;
-            padding: 8px 16px;
-            font-weight: 500;
+        /* Container Cards */
+        .portal-card {
+            background: var(--card-surface);
+            border: 1px solid var(--border-line);
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
         }
 
-        .nav-pills .nav-link.active {
-            background: var(--primary-gradient);
-            color: #fff;
+        /* High Visibility KPI Tiles */
+        .kpi-tile {
+            background: var(--card-surface-elevated);
+            border: 1px solid var(--border-line);
+            border-radius: 12px;
+            padding: 1.1rem 1.25rem;
+        }
+        .kpi-title {
+            color: #f1f5f9 !important;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
         }
 
+        /* Form Labels & Controls */
+        .form-label {
+            color: #f8fafc !important;
+            font-size: 0.825rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.4rem;
+        }
         .form-control, .form-select {
-            background-color: rgba(30, 41, 59, 0.6);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            color: #fff;
+            background-color: #080d1a !important;
+            border: 1px solid rgba(255, 255, 255, 0.25) !important;
+            color: #ffffff !important;
+            font-weight: 500;
             border-radius: 8px;
+            padding: 0.65rem 0.85rem;
         }
-
         .form-control:focus, .form-select:focus {
-            background-color: rgba(30, 41, 59, 0.9);
-            border-color: #38bdf8;
-            color: #fff;
-            box-shadow: 0 0 0 0.25rem rgba(56, 189, 248, 0.25);
+            border-color: var(--text-highlight) !important;
+            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.25) !important;
+        }
+        .form-control::placeholder {
+            color: #64748b !important;
         }
 
-        .btn-gradient {
-            background: var(--primary-gradient);
+        /* Action Buttons */
+        .btn-primary-action {
+            background-color: var(--color-primary);
             border: none;
-            color: #fff;
-            font-weight: 600;
+            color: #ffffff;
+            font-weight: 700;
             border-radius: 8px;
-            transition: all 0.3s ease;
+            padding: 0.75rem 1.25rem;
+            transition: all 0.2s ease;
+        }
+        .btn-primary-action:hover {
+            background-color: var(--color-primary-hover);
+            color: #ffffff;
         }
 
-        .btn-gradient:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(14, 165, 233, 0.4);
-            color: #fff;
+        /* Tabs */
+        .nav-pills .nav-link {
+            color: var(--text-sub);
+            font-weight: 600;
+            padding: 0.6rem 1.25rem;
+            border-radius: 8px;
+        }
+        .nav-pills .nav-link.active {
+            background-color: var(--color-primary);
+            color: #ffffff;
         }
 
-        .table-custom {
-            color: var(--text-main);
+        /* High Visibility Table Grids */
+        .table-portal {
+            color: #ffffff !important;
             border-collapse: separate;
             border-spacing: 0 8px;
         }
-
-        .table-custom tr {
-            background: rgba(30, 41, 59, 0.4);
+        .table-portal thead th {
+            color: #94a3b8 !important;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.6px;
+            border: none;
+            padding: 0.75rem 1rem;
+        }
+        .table-portal tbody tr {
+            background: #1e293b !important;
+            border: 1px solid var(--border-line);
             border-radius: 8px;
         }
-
-        .badge-pending { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4); }
-        .badge-cleared { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); }
-        .badge-rejected { background: rgba(244, 63, 94, 0.2); color: #fb7185; border: 1px solid rgba(244, 63, 94, 0.4); }
-        .badge-role { background: rgba(99, 102, 241, 0.2); color: #818cf8; border: 1px solid rgba(99, 102, 241, 0.4); }
-
-        .badge-sla-breached {
-            background: rgba(239, 68, 68, 0.25);
-            color: #f87171;
-            border: 1px solid #ef4444;
-            animation: pulse 1.5s infinite;
+        .table-portal tbody tr:hover {
+            background: #27354f !important;
+        }
+        .table-portal td {
+            padding: 0.9rem 1rem;
+            border: none;
+            color: #f1f5f9 !important;
+            font-size: 0.9rem;
+            vertical-align: middle;
         }
 
-        @keyframes pulse {
-            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
-            70% { transform: scale(1.03); box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
-            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        /* Specific High-Contrast Table Cells */
+        .tracking-cell {
+            color: #38bdf8 !important;
+            font-weight: 700;
+            font-size: 0.95rem;
+        }
+        .weight-cell {
+            color: #fbbf24 !important;
+            font-weight: 700;
+        }
+
+        /* Table Contrast Fix */
+        .table-portal {
+            --bs-table-bg: transparent !important;
+            --bs-table-color: #ffffff !important;
+            background-color: transparent !important;
+            border-collapse: separate !important;
+            border-spacing: 0 8px !important;
+            width: 100%;
+        }
+
+        .table-portal thead th {
+            background-color: #0b1120 !important;
+            color: #94a3b8 !important;
+            font-weight: 700 !important;
+            text-transform: uppercase;
+            font-size: 0.78rem;
+            letter-spacing: 0.5px;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            padding: 0.75rem 1rem !important;
+        }
+
+        .table-portal thead th:first-child { border-radius: 8px 0 0 8px; }
+        .table-portal thead th:last-child { border-radius: 0 8px 8px 0; }
+
+        .table-portal tbody tr {
+            background-color: #1e293b !important;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .table-portal tbody tr:hover {
+            background-color: #283853 !important;
+        }
+
+        .table-portal tbody td {
+            background-color: transparent !important;
+            border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+            border-left: none !important;
+            border-right: none !important;
+            padding: 0.9rem 1rem !important;
+            vertical-align: middle !important;
+        }
+
+        .table-portal tbody td:first-child {
+            border-left: 1px solid rgba(255, 255, 255, 0.08) !important;
+            border-radius: 8px 0 0 8px;
+        }
+
+        .table-portal tbody td:last-child {
+            border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
+            border-radius: 0 8px 8px 0;
+        }
+
+        /* High Contrast Data Elements */
+        .tracking-badge {
+            color: #38bdf8 !important;
+            font-weight: 700 !important;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.95rem;
+            letter-spacing: 0.5px;
+        }
+
+        .route-text {
+            color: #f1f5f9 !important;
+            font-weight: 500;
+        }
+
+        .weight-text {
+            color: #fbbf24 !important;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Badges */
+        .status-badge {
+            padding: 0.35rem 0.75rem;
+            font-weight: 700;
+            font-size: 0.75rem;
+            border-radius: 6px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .status-pending { background: rgba(245, 158, 11, 0.2); color: #fde047; border: 1px solid rgba(245, 158, 11, 0.5); }
+        .status-cleared { background: rgba(16, 185, 129, 0.2); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.5); }
+        .status-rejected { background: rgba(239, 68, 68, 0.2); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.5); }
+        .status-breached {
+            background: rgba(239, 68, 68, 0.3);
+            color: #fecaca;
+            border: 1px solid #ef4444;
+            animation: pulse-border 1.5s infinite;
+        }
+
+        @keyframes pulse-border {
+            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            70% { box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
         }
     </style>
 </head>
 <body>
 
-<nav class="navbar navbar-expand-lg navbar-custom sticky-top py-3">
+<!-- Header with Logo -->
+<header class="app-header sticky-top py-2">
     <div class="container">
-        <a class="navbar-brand d-flex align-items-center text-white fw-bold fs-4" href="#">
-            <i class="fa-solid fa-boxes-packing text-info me-2"></i> GlobalTrade SCM
-        </a>
-        <div class="d-flex align-items-center gap-3">
-            <div class="d-flex align-items-center bg-dark border border-secondary px-3 py-1 rounded-3">
-                <i class="fa-solid fa-user-shield text-info me-2"></i>
-                <select id="roleSelector" class="form-select form-select-sm border-0 bg-transparent text-white" onchange="switchRole()">
-                    <option value="LOGISTICS_ADMIN" class="bg-dark" selected>Role: Logistics Admin (All Access)</option>
-                    <option value="VENDOR" class="bg-dark">Role: Vendor (Limited View)</option>
-                    <option value="CUSTOMS_AGENT" class="bg-dark">Role: Customs Agent (Clearance Only)</option>
-                </select>
+        <div class="d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center gap-3">
+                <!-- Custom Dynamic Logo (Replace src with 'images/logo.png' if using custom file) -->
+                <div class="d-flex align-items-center justify-content-center bg-primary rounded-3 text-white shadow-sm" style="width: 44px; height: 44px;">
+                    <i class="fa-solid fa-truck-fast fs-4"></i>
+                </div>
+                <div>
+                    <h5 class="fw-bold mb-0 text-white tracking-wide">GlobalTrade <span class="text-info">Logistics</span></h5>
+                    <span class="text-sub small">Enterprise SCM Operations Platform</span>
+                </div>
+            </div>
+
+            <div class="d-flex align-items-center gap-3">
+                <div class="d-flex align-items-center bg-dark border border-secondary px-3 py-1 rounded-2">
+                    <label for="roleSelector" class="me-2 text-sub small fw-bold"><i class="fa-solid fa-user-tag text-info me-1"></i> Active Role:</label>
+                    <select id="roleSelector" class="form-select form-select-sm border-0 bg-transparent text-white fw-bold" onchange="switchRole()">
+                        <option value="LOGISTICS_ADMIN" class="bg-dark" selected>Logistics Coordinator (Admin)</option>
+                        <option value="VENDOR" class="bg-dark">Supplier / Vendor</option>
+                        <option value="CUSTOMS_AGENT" class="bg-dark">Customs Inspector</option>
+                    </select>
+                </div>
+                <span class="badge bg-dark border border-secondary px-3 py-2 text-success mono">
+                    <i class="fa-solid fa-circle text-success me-1"></i> System Online
+                </span>
             </div>
         </div>
     </div>
-</nav>
+</header>
 
-<div class="container my-4">
-    <!-- View Navigation Tabs -->
+<main class="container my-4">
+
+    <!-- KPI Summary Row with High Contrast Labels -->
+    <section class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="kpi-tile">
+                <span class="kpi-title d-block mb-1">Total Consignments</span>
+                <h3 class="fw-bold text-white my-1 mono" id="kpiShipments">0</h3>
+                <span class="text-sub small">All System Records</span>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="kpi-tile">
+                <span class="kpi-title d-block mb-1">Customs Approved</span>
+                <h3 class="fw-bold text-success my-1 mono" id="kpiCleared">0</h3>
+                <span class="text-success small fw-semibold"><i class="fa-solid fa-circle-check me-1"></i> Cleared Port</span>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="kpi-tile">
+                <span class="kpi-title d-block mb-1">SLA Overdue Alerts</span>
+                <h3 class="fw-bold text-danger my-1 mono" id="kpiBreached">0</h3>
+                <span class="text-danger small fw-semibold"><i class="fa-solid fa-clock-rotate-left me-1"></i> Delayed Inspections</span>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="kpi-tile">
+                <span class="kpi-title d-block mb-1">Inventory Items</span>
+                <h3 class="fw-bold text-info my-1 mono" id="kpiInventory">0</h3>
+                <span class="text-info small fw-semibold"><i class="fa-solid fa-boxes-stacked me-1"></i> Active Stock SKUs</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Navigation Tabs -->
     <ul class="nav nav-pills mb-4 gap-2" id="pills-tab" role="tablist">
-        <li class="nav-item" role="presentation">
-            <button class="nav-link active" id="pills-shipments-tab" data-bs-toggle="pill" data-bs-target="#pills-shipments" type="button" role="tab">
-                <i class="fa-solid fa-truck-fast me-2"></i>Shipments & Dispatch
+        <li class="nav-item">
+            <button class="nav-link active" id="pills-shipments-tab" data-bs-toggle="pill" data-bs-target="#pills-shipments" type="button">
+                <i class="fa-solid fa-boxes-packing me-2"></i>Shipments & Dispatch
             </button>
         </li>
-        <li class="nav-item admin-only-tab" role="presentation">
-            <button class="nav-link" id="pills-inventory-tab" data-bs-toggle="pill" data-bs-target="#pills-inventory" type="button" role="tab">
+        <li class="nav-item admin-only-tab">
+            <button class="nav-link" id="pills-inventory-tab" data-bs-toggle="pill" data-bs-target="#pills-inventory" type="button">
                 <i class="fa-solid fa-warehouse me-2"></i>Warehouse Inventory
             </button>
         </li>
-        <li class="nav-item admin-only-tab" role="presentation">
-            <button class="nav-link" id="pills-users-tab" data-bs-toggle="pill" data-bs-target="#pills-users" type="button" role="tab">
-                <i class="fa-solid fa-users-gear me-2"></i>Vendors & Governance
+        <li class="nav-item admin-only-tab">
+            <button class="nav-link" id="pills-users-tab" data-bs-toggle="pill" data-bs-target="#pills-users" type="button">
+                <i class="fa-solid fa-users me-2"></i>Vendors & Accounts
             </button>
         </li>
-        <li class="nav-item admin-only-tab" role="presentation">
-            <button class="nav-link" id="pills-audits-tab" data-bs-toggle="pill" data-bs-target="#pills-audits" type="button" role="tab">
-                <i class="fa-solid fa-clipboard-list me-2"></i>AOP Audit Trails
+        <li class="nav-item admin-only-tab">
+            <button class="nav-link" id="pills-audits-tab" data-bs-toggle="pill" data-bs-target="#pills-audits" type="button">
+                <i class="fa-solid fa-list-check me-2"></i>Activity & Audit Log
             </button>
         </li>
     </ul>
 
+    <!-- Tab Contents -->
     <div class="tab-content" id="pills-tabContent">
 
         <!-- Tab 1: Shipments Management -->
         <div class="tab-pane fade show active" id="pills-shipments" role="tabpanel">
             <div class="row g-4">
+
+                <!-- Dispatch Form -->
                 <div class="col-lg-5" id="dispatchCol">
-                    <div class="glass-card p-4">
-                        <h5 class="fw-bold mb-2 text-info"><i class="fa-solid fa-paper-plane me-2"></i>Dispatch Consignment (CMT)</h5>
-                        <p class="text-muted small mb-3">Atomic 2PC JTA Transaction across Inventory and Shipments.</p>
+                    <div class="portal-card p-4">
+                        <div class="mb-3">
+                            <h5 class="fw-bold text-white mb-1">Create New Consignment</h5>
+                            <span class="text-sub small">Dispatch inventory items with automated safety verification.</span>
+                        </div>
 
                         <form id="dispatchForm">
-                            <div class="mb-2">
-                                <label class="form-label text-muted small fw-bold">Tracking Number</label>
-                                <input type="text" id="trackNo" class="form-control form-control-sm" placeholder="e.g. TRK-88090" required>
+                            <div class="mb-3">
+                                <label class="form-label">Tracking Number</label>
+                                <input type="text" id="trackNo" class="form-control mono" placeholder="TRK-90021" required>
                             </div>
-                            <div class="row g-2 mb-2">
-                                <div class="col-6">
-                                    <label class="form-label text-muted small fw-bold">Origin</label>
-                                    <input type="text" id="origin" class="form-control form-control-sm" value="Singapore" required>
-                                </div>
-                                <div class="col-6">
-                                    <label class="form-label text-muted small fw-bold">Destination</label>
-                                    <input type="text" id="destination" class="form-control form-control-sm" value="Colombo" required>
-                                </div>
-                            </div>
-                            <div class="mb-2">
-                                <label class="form-label text-muted small fw-bold">Payload Weight (kg) <span class="text-danger">(Max: 50,000kg)</span></label>
-                                <input type="number" id="weight" class="form-control form-control-sm" placeholder="52000 triggers Rollback" required>
-                            </div>
-                            <div class="mb-2">
-                                <label class="form-label text-muted small fw-bold">Vendor ID</label>
-                                <select id="vendorSelect" class="form-select form-select-sm" required></select>
-                            </div>
+
                             <div class="row g-2 mb-3">
+                                <div class="col-6">
+                                    <label class="form-label">Port of Origin</label>
+                                    <input type="text" id="origin" class="form-control" value="Singapore" required>
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label">Destination Port</label>
+                                    <input type="text" id="destination" class="form-control" value="Colombo" required>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Cargo Weight (kg) <span class="text-warning small fw-bold">(Air limit: 50,000 kg)</span></label>
+                                <input type="number" id="weight" class="form-control mono" placeholder="e.g. 1500" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Assigned Vendor</label>
+                                <select id="vendorSelect" class="form-select" required></select>
+                            </div>
+
+                            <div class="row g-2 mb-4">
                                 <div class="col-7">
-                                    <label class="form-label text-muted small fw-bold">Inventory Item</label>
-                                    <select id="itemSelect" class="form-select form-select-sm" required></select>
+                                    <label class="form-label">Inventory Product</label>
+                                    <select id="itemSelect" class="form-select" required></select>
                                 </div>
                                 <div class="col-5">
-                                    <label class="form-label text-muted small fw-bold">Quantity</label>
-                                    <input type="number" id="qty" class="form-control form-control-sm" value="5" min="1" required>
+                                    <label class="form-label">Quantity</label>
+                                    <input type="number" id="qty" class="form-control mono" value="5" min="1" required>
                                 </div>
                             </div>
-                            <button type="submit" class="btn btn-gradient w-100 py-2">
-                                <i class="fa-solid fa-bolt me-1"></i> Process JTA Transaction
+
+                            <button type="submit" class="btn btn-primary-action w-100">
+                                <i class="fa-solid fa-paper-plane me-2"></i>Dispatch Consignment
                             </button>
                         </form>
                         <div id="alertPlaceholder" class="mt-3"></div>
                     </div>
                 </div>
 
+                <!-- Consignments Live Grid -->
                 <div class="col-lg-7" id="shipmentGridCol">
-                    <div class="glass-card p-4">
+                    <div class="portal-card p-4">
                         <div class="d-flex justify-content-between align-items-center mb-3">
-                            <h5 class="fw-bold mb-0 text-info"><i class="fa-solid fa-table-list me-2"></i>Active Consignments</h5>
-                            <button class="btn btn-sm btn-outline-info" onclick="loadAllData()"><i class="fa-solid fa-arrows-rotate me-1"></i> Refresh</button>
+                            <div>
+                                <h5 class="fw-bold mb-0 text-white">Live Shipments</h5>
+                                <span class="text-sub small">Active cargo tracking and port inspections</span>
+                            </div>
+                            <button class="btn btn-sm btn-outline-secondary text-white" onclick="loadAllData()">
+                                <i class="fa-solid fa-arrows-rotate me-1"></i> Refresh
+                            </button>
                         </div>
                         <div class="table-responsive">
-                            <table class="table table-custom align-middle">
+                            <table class="table table-portal align-middle">
                                 <thead>
-                                <tr class="text-muted small">
+                                <tr>
                                     <th>Tracking #</th>
                                     <th>Route</th>
                                     <th>Weight</th>
                                     <th>Status</th>
-                                    <th class="text-end">BMT Action</th>
+                                    <th class="text-end">Customs Action</th>
                                 </tr>
                                 </thead>
                                 <tbody id="shipmentTable"></tbody>
@@ -234,34 +455,34 @@
             </div>
         </div>
 
-        <!-- Tab 2: Warehouse Inventory Management (Admin Only) -->
+        <!-- Tab 2: Warehouse Inventory Management -->
         <div class="tab-pane fade" id="pills-inventory" role="tabpanel">
             <div class="row g-4">
                 <div class="col-lg-4">
-                    <div class="glass-card p-4">
-                        <h5 class="fw-bold mb-2 text-info"><i class="fa-solid fa-plus-circle me-2"></i>Add Inventory Item</h5>
-                        <p class="text-muted small mb-3">Persist new warehouse stock into MySQL SCM Database.</p>
+                    <div class="portal-card p-4">
+                        <h5 class="fw-bold text-white mb-1">Add Warehouse Stock</h5>
+                        <p class="text-sub small mb-3">Register new inventory batch into database.</p>
                         <form id="addItemForm">
-                            <div class="mb-2">
-                                <label class="form-label text-muted small fw-bold">Item Code</label>
-                                <input type="text" id="newItemCode" class="form-control form-control-sm" placeholder="e.g. ITM-MED-09" required>
+                            <div class="mb-3">
+                                <label class="form-label">Item Code</label>
+                                <input type="text" id="newItemCode" class="form-control mono" placeholder="ITM-COL-102" required>
                             </div>
-                            <div class="mb-2">
-                                <label class="form-label text-muted small fw-bold">Item Name</label>
-                                <input type="text" id="newItemName" class="form-control form-control-sm" placeholder="e.g. Surgical Sensors" required>
+                            <div class="mb-3">
+                                <label class="form-label">Product Name</label>
+                                <input type="text" id="newItemName" class="form-control" placeholder="Industrial Sensor Unit" required>
                             </div>
-                            <div class="row g-2 mb-3">
+                            <div class="row g-2 mb-4">
                                 <div class="col-6">
-                                    <label class="form-label text-muted small fw-bold">Initial Stock</label>
-                                    <input type="number" id="newQty" class="form-control form-control-sm" value="100" required>
+                                    <label class="form-label">Initial Quantity</label>
+                                    <input type="number" id="newQty" class="form-control mono" value="100" required>
                                 </div>
                                 <div class="col-6">
-                                    <label class="form-label text-muted small fw-bold">Threshold</label>
-                                    <input type="number" id="newThreshold" class="form-control form-control-sm" value="20" required>
+                                    <label class="form-label">Reorder Level</label>
+                                    <input type="number" id="newThreshold" class="form-control mono" value="20" required>
                                 </div>
                             </div>
-                            <button type="submit" class="btn btn-gradient w-100 py-2">
-                                <i class="fa-solid fa-floppy-disk me-1"></i> Save to Database
+                            <button type="submit" class="btn btn-primary-action w-100">
+                                <i class="fa-solid fa-floppy-disk me-2"></i>Save Product
                             </button>
                         </form>
                         <div id="itemAlert" class="mt-3"></div>
@@ -269,17 +490,17 @@
                 </div>
 
                 <div class="col-lg-8">
-                    <div class="glass-card p-4">
-                        <h5 class="fw-bold mb-3 text-info"><i class="fa-solid fa-boxes-stacked me-2"></i>Warehouse Inventory Stock</h5>
+                    <div class="portal-card p-4">
+                        <h5 class="fw-bold text-white mb-3">Warehouse Stock Levels</h5>
                         <div class="table-responsive">
-                            <table class="table table-custom align-middle">
+                            <table class="table table-portal align-middle">
                                 <thead>
-                                <tr class="text-muted small">
+                                <tr>
                                     <th>ID</th>
                                     <th>Item Code</th>
-                                    <th>Item Name</th>
-                                    <th>Available Stock</th>
-                                    <th>Reorder Threshold</th>
+                                    <th>Product Name</th>
+                                    <th>Available Units</th>
+                                    <th>Reorder Level</th>
                                 </tr>
                                 </thead>
                                 <tbody id="inventoryFullTable"></tbody>
@@ -290,32 +511,32 @@
             </div>
         </div>
 
-        <!-- Tab 3: Users & Vendors Governance (Admin Only) -->
+        <!-- Tab 3: Users & Vendors Governance -->
         <div class="tab-pane fade" id="pills-users" role="tabpanel">
             <div class="row g-4">
                 <div class="col-lg-4">
-                    <div class="glass-card p-4">
-                        <h5 class="fw-bold mb-2 text-info"><i class="fa-solid fa-user-plus me-2"></i>Register System User</h5>
-                        <p class="text-muted small mb-3">Create role-based identities for Logistics & Vendors.</p>
+                    <div class="portal-card p-4">
+                        <h5 class="fw-bold text-white mb-1">Register New Account</h5>
+                        <p class="text-sub small mb-3">Create access credentials for vendors or logistics staff.</p>
                         <form id="addUserForm">
-                            <div class="mb-2">
-                                <label class="form-label text-muted small fw-bold">Username</label>
-                                <input type="text" id="newUsername" class="form-control form-control-sm" placeholder="e.g. vendor_asia" required>
-                            </div>
-                            <div class="mb-2">
-                                <label class="form-label text-muted small fw-bold">Password</label>
-                                <input type="password" id="newPassword" class="form-control form-control-sm" placeholder="••••••••" required>
+                            <div class="mb-3">
+                                <label class="form-label">Username</label>
+                                <input type="text" id="newUsername" class="form-control" placeholder="colombo_shipping" required>
                             </div>
                             <div class="mb-3">
-                                <label class="form-label text-muted small fw-bold">Role Assignment</label>
-                                <select id="newRole" class="form-select form-select-sm" required>
-                                    <option value="VENDOR">VENDOR</option>
-                                    <option value="CUSTOMS_AGENT">CUSTOMS_AGENT</option>
-                                    <option value="LOGISTICS_ADMIN">LOGISTICS_ADMIN</option>
+                                <label class="form-label">Password</label>
+                                <input type="password" id="newPassword" class="form-control" placeholder="••••••••" required>
+                            </div>
+                            <div class="mb-4">
+                                <label class="form-label">Access Role</label>
+                                <select id="newRole" class="form-select" required>
+                                    <option value="VENDOR">Supplier / Vendor</option>
+                                    <option value="CUSTOMS_AGENT">Customs Inspector</option>
+                                    <option value="LOGISTICS_ADMIN">Logistics Coordinator</option>
                                 </select>
                             </div>
-                            <button type="submit" class="btn btn-gradient w-100 py-2">
-                                <i class="fa-solid fa-shield me-1"></i> Create User Entity
+                            <button type="submit" class="btn btn-primary-action w-100">
+                                <i class="fa-solid fa-user-plus me-2"></i>Create User Account
                             </button>
                         </form>
                         <div id="userAlert" class="mt-3"></div>
@@ -323,15 +544,15 @@
                 </div>
 
                 <div class="col-lg-8">
-                    <div class="glass-card p-4">
-                        <h5 class="fw-bold mb-3 text-info"><i class="fa-solid fa-users-viewfinder me-2"></i>Registered System Principals</h5>
+                    <div class="portal-card p-4">
+                        <h5 class="fw-bold text-white mb-3">Authorized System Users</h5>
                         <div class="table-responsive">
-                            <table class="table table-custom align-middle">
+                            <table class="table table-portal align-middle">
                                 <thead>
-                                <tr class="text-muted small">
-                                    <th>Username</th>
-                                    <th>Security Role</th>
-                                    <th>Access Level</th>
+                                <tr>
+                                    <th>Account Username</th>
+                                    <th>Role</th>
+                                    <th>Permissions</th>
                                 </tr>
                                 </thead>
                                 <tbody id="userFullTable"></tbody>
@@ -342,36 +563,38 @@
             </div>
         </div>
 
-    </div>
-
-    <!-- Tab 4: AOP Audit Trails (Admin Only) -->
-    <div class="tab-pane fade" id="pills-audits" role="tabpanel">
-        <div class="glass-card p-4">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <div>
-                    <h5 class="fw-bold mb-0 text-info"><i class="fa-solid fa-shield-halved me-2"></i>EJB AOP Interceptor Audit Trail</h5>
-                    <p class="text-muted small mb-0">Real-time telemetry and invocation metrics captured via LogisticsAuditInterceptor</p>
+        <!-- Tab 4: Audit & Activity Log -->
+        <div class="tab-pane fade" id="pills-audits" role="tabpanel">
+            <div class="portal-card p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <h5 class="fw-bold mb-0 text-white">System Activity & Audit Trail</h5>
+                        <span class="text-sub small">Recorded execution logs and compliance timestamps</span>
+                    </div>
+                    <button class="btn btn-sm btn-outline-secondary text-white" onclick="loadAllData()">
+                        <i class="fa-solid fa-arrows-rotate me-1"></i> Refresh
+                    </button>
                 </div>
-                <button class="btn btn-sm btn-outline-info" onclick="loadAllData()"><i class="fa-solid fa-arrows-rotate me-1"></i> Refresh</button>
-            </div>
-            <div class="table-responsive">
-                <table class="table table-custom align-middle">
-                    <thead>
-                    <tr class="text-muted small">
-                        <th>ID</th>
-                        <th>Target EJB Service</th>
-                        <th>Invoked Method</th>
-                        <th>Caller Principal</th>
-                        <th>Execution (ms)</th>
-                        <th>Invocation Status</th>
-                    </tr>
-                    </thead>
-                    <tbody id="auditFullTable"></tbody>
-                </table>
+                <div class="table-responsive">
+                    <table class="table table-portal align-middle">
+                        <thead>
+                        <tr>
+                            <th>Log ID</th>
+                            <th>Target Service</th>
+                            <th>Executed Method</th>
+                            <th>User Principal</th>
+                            <th>Response Time</th>
+                            <th>Outcome</th>
+                        </tr>
+                        </thead>
+                        <tbody id="auditFullTable"></tbody>
+                    </table>
+                </div>
             </div>
         </div>
+
     </div>
-</div>
+</main>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
@@ -398,7 +621,7 @@
 
     async function loadAllData() {
         try {
-            // 1. Fetch Users (Vendors & Governance)
+            // 1. Fetch Users
             const userRes = await fetch(`${API}/users`);
             if (userRes.ok) {
                 const users = await userRes.json();
@@ -412,83 +635,102 @@
                         vendorSel.innerHTML += `<option value="${u.username}">${u.username} (${u.role})</option>`;
                     }
                     if (userFullTable) {
+                        const roleBadgeClass = u.role === 'LOGISTICS_ADMIN' ? 'bg-primary' : (u.role === 'CUSTOMS_AGENT' ? 'bg-info text-dark' : 'bg-secondary');
                         userFullTable.innerHTML += `
                             <tr>
-                                <td><strong class="text-light"><i class="fa-solid fa-user me-2 text-info"></i>${u.username}</strong></td>
-                                <td><span class="badge badge-role px-2 py-1">${u.role}</span></td>
-                                <td class="text-muted small">${u.role === 'LOGISTICS_ADMIN' ? 'Full Read/Write/Rollback' : (u.role === 'CUSTOMS_AGENT' ? 'BMT Clearance Verification' : 'Limited Shipment View')}</td>
+                                <td><strong class="text-white"><i class="fa-solid fa-user-circle me-2 text-info"></i>${u.username}</strong></td>
+                                <td><span class="badge ${roleBadgeClass} px-2 py-1">${u.role}</span></td>
+                                <td class="text-sub small">${u.role === 'LOGISTICS_ADMIN' ? 'Full Operational Control' : (u.role === 'CUSTOMS_AGENT' ? 'Inspection & Clearance' : 'Read Shipment Status')}</td>
                             </tr>`;
                     }
                 });
             }
 
-            // 2. Fetch Warehouse Inventory Stock
+            // 2. Fetch Inventory
             const invRes = await fetch(`${API}/inventory`);
             if (invRes.ok) {
                 const items = await invRes.json();
                 const itemSel = document.getElementById('itemSelect');
                 const invFullTable = document.getElementById('inventoryFullTable');
+                const kpiInventory = document.getElementById('kpiInventory');
+                if (kpiInventory) kpiInventory.innerText = items.length;
                 if (itemSel) itemSel.innerHTML = '';
                 if (invFullTable) invFullTable.innerHTML = '';
 
                 items.forEach(i => {
                     if (itemSel) {
-                        itemSel.innerHTML += `<option value="${i.id}">${i.itemName} (Stock: ${i.quantityAvailable})</option>`;
+                        itemSel.innerHTML += `<option value="${i.id}">${i.itemName} (${i.quantityAvailable} in stock)</option>`;
                     }
                     if (invFullTable) {
+                        const isLow = i.quantityAvailable <= i.reorderThreshold;
                         invFullTable.innerHTML += `
                             <tr>
-                                <td><span class="text-muted">#${i.id}</span></td>
-                                <td><strong class="text-info">${i.itemCode}</strong></td>
-                                <td>${i.itemName}</td>
-                                <td><span class="badge ${i.quantityAvailable <= i.reorderThreshold ? 'badge-rejected' : 'badge-cleared'} px-2 py-1">${i.quantityAvailable} units</span></td>
-                                <td class="text-muted">${i.reorderThreshold} units</td>
+                                <td><span class="text-dim mono">#${i.id}</span></td>
+                                <td><strong class="text-info mono">${i.itemCode}</strong></td>
+                                <td class="text-white">${i.itemName}</td>
+                                <td><span class="status-badge ${isLow ? 'status-rejected' : 'status-cleared'}">${i.quantityAvailable} units</span></td>
+                                <td class="text-sub mono">${i.reorderThreshold} units</td>
                             </tr>`;
                     }
                 });
             }
 
-            // 3. Fetch Active Consignments (Shipments & Live SLA Tracking)
+            // 3. Fetch Shipments
             const shipRes = await fetch(`${API}/shipments`);
             if (shipRes.ok) {
                 const shipments = await shipRes.json();
                 const tbody = document.getElementById('shipmentTable');
-                if (!tbody) return;
-                tbody.innerHTML = '';
+                const kpiShipments = document.getElementById('kpiShipments');
+                const kpiCleared = document.getElementById('kpiCleared');
+                const kpiBreached = document.getElementById('kpiBreached');
 
-                if (shipments.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-4">No consignments found.</td></tr>';
-                    return;
-                }
+                if (kpiShipments) kpiShipments.innerText = shipments.length;
+                if (kpiCleared) kpiCleared.innerText = shipments.filter(s => s.status === 'CUSTOMS_CLEARED').length;
+                if (kpiBreached) kpiBreached.innerText = shipments.filter(s => s.status === 'SLA_BREACHED').length;
 
-                shipments.forEach(s => {
-                    let badgeClass = 'badge-pending';
-                    let statusText = s.status;
+                if (tbody) {
+                    tbody.innerHTML = '';
+                    if (shipments.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="5" class="text-center text-sub py-4">No shipments on record.</td></tr>';
+                    } else {
+                        shipments.forEach(s => {
+                            let badgeClass = 'status-pending';
+                            let statusText = s.status;
 
-                    if (s.status === 'CUSTOMS_CLEARED') {
-                        badgeClass = 'badge-cleared';
-                    } else if (s.status === 'CUSTOMS_REJECTED') {
-                        badgeClass = 'badge-rejected';
-                    } else if (s.status === 'SLA_BREACHED') {
-                        badgeClass = 'badge-sla-breached';
-                        statusText = '<i class="fa-solid fa-triangle-exclamation me-1"></i> SLA BREACHED';
+                            if (s.status === 'CUSTOMS_CLEARED') {
+                                badgeClass = 'status-cleared';
+                                statusText = '<i class="fa-solid fa-check me-1"></i> Approved';
+                            } else if (s.status === 'CUSTOMS_REJECTED') {
+                                badgeClass = 'status-rejected';
+                                statusText = '<i class="fa-solid fa-xmark me-1"></i> Rejected';
+                            } else if (s.status === 'SLA_BREACHED') {
+                                badgeClass = 'status-breached';
+                                statusText = '<i class="fa-solid fa-triangle-exclamation me-1"></i> Inspection Delayed';
+                            } else {
+                                statusText = '<i class="fa-solid fa-clock me-1"></i> In Transit';
+                            }
+
+                            tbody.innerHTML += `
+        <tr>
+            <td><span class="tracking-badge">${s.trackingNumber}</span></td>
+            <td class="route-text">${s.originCountry} <i class="fa-solid fa-arrow-right text-info mx-1 small"></i> ${s.destinationCountry}</td>
+            <td class="weight-text">${s.payloadWeight} kg</td>
+            <td><span class="status-badge ${badgeClass}">${statusText}</span></td>
+            <td class="text-end">
+                <button class="btn btn-sm btn-outline-success px-2 py-1 me-1" onclick="handleClearance(${s.id}, true)" title="Approve Clearance">
+                    <i class="fa-solid fa-check"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-danger px-2 py-1" onclick="handleClearance(${s.id}, false)" title="Reject Clearance">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </td>
+        </tr>`;
+                        });
                     }
-
-                    tbody.innerHTML += `
-                        <tr>
-                            <td><strong class="text-light">${s.trackingNumber}</strong></td>
-                            <td>${s.originCountry} &rarr; ${s.destinationCountry}</td>
-                            <td>${s.payloadWeight} kg</td>
-                            <td><span class="badge ${badgeClass} px-2 py-1">${statusText}</span></td>
-                            <td class="text-end">
-                                <button class="btn btn-sm btn-success py-0 px-2 me-1" onclick="handleClearance(${s.id}, true)" title="BMT Pass"><i class="fa-solid fa-check"></i></button>
-                                <button class="btn btn-sm btn-danger py-0 px-2" onclick="handleClearance(${s.id}, false)" title="BMT Reject"><i class="fa-solid fa-xmark"></i></button>
-                            </td>
-                        </tr>`;
-                });
+                }
             }
 
-            // 4. Fetch AOP Audit Logs
+            // 4. Fetch Audit Logs
             const auditRes = await fetch(`${API}/audits`);
             if (auditRes.ok) {
                 const logs = await auditRes.json();
@@ -496,41 +738,39 @@
                 if (auditTable) {
                     auditTable.innerHTML = '';
                     if (logs.length === 0) {
-                        auditTable.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-4">No audit logs recorded yet.</td></tr>';
+                        auditTable.innerHTML = '<tr><td colspan="6" class="text-center text-sub py-4">No activity records logged.</td></tr>';
                     } else {
                         logs.forEach(l => {
-                            // Match property names correctly
                             const sName = l.serviceName || l.service_name || 'OrderProcessingService';
                             const mName = l.methodName || l.method_name || 'execute';
                             const execTime = l.executionTimeMs !== undefined ? l.executionTimeMs : (l.executionTime !== undefined ? l.executionTime : 0);
                             const stat = l.status || 'SUCCESS';
-                            const user = l.executedBy || l.caller || 'ANONYMOUS';
-
+                            const user = l.executedBy || l.caller || 'System User';
                             const isSuccess = String(stat).startsWith('SUCCESS');
 
                             auditTable.innerHTML += `
-                    <tr>
-                        <td><span class="text-muted">#${l.id}</span></td>
-                        <td><strong class="text-light">${sName}</strong></td>
-                        <td><span class="badge bg-dark border border-secondary text-info">${mName}()</span></td>
-                        <td><span class="text-muted small">${user}</span></td>
-                        <td><span class="text-warning">${execTime} ms</span></td>
-                        <td><span class="badge ${isSuccess ? 'badge-cleared' : 'badge-rejected'} px-2 py-1">${stat}</span></td>
-                    </tr>`;
+                                <tr>
+                                    <td><span class="text-dim mono">#${l.id}</span></td>
+                                    <td><strong class="text-white">${sName}</strong></td>
+                                    <td><span class="badge bg-dark border border-secondary text-info mono">${mName}()</span></td>
+                                    <td><span class="text-sub small">${user}</span></td>
+                                    <td><span class="text-warning mono fw-bold">${execTime} ms</span></td>
+                                    <td><span class="status-badge ${isSuccess ? 'status-cleared' : 'status-rejected'}">${stat}</span></td>
+                                </tr>`;
                         });
                     }
                 }
             }
         } catch (e) {
-            console.error('Error loading data:', e);
+            console.error('Data retrieval failed:', e);
         }
     }
 
-    // Form 1: Dispatch Consignment (CMT JTA Transaction)
+    // Dispatch Consignment
     document.getElementById('dispatchForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         const alertBox = document.getElementById('alertPlaceholder');
-        alertBox.innerHTML = '<div class="alert alert-info py-2 small"><i class="fa-solid fa-spinner fa-spin me-2"></i>Executing 2PC JTA Transaction...</div>';
+        alertBox.innerHTML = '<div class="alert alert-info py-2 small"><i class="fa-solid fa-spinner fa-spin me-2"></i>Processing consignment dispatch...</div>';
 
         const tNo = document.getElementById('trackNo').value;
         const org = document.getElementById('origin').value;
@@ -543,17 +783,17 @@
         const res = await fetch(`${API}/shipments?trackingNo=${tNo}&origin=${org}&destination=${dst}&weight=${wgt}&vendor=${ven}&itemId=${itm}&qty=${qty}`, { method: 'POST' });
 
         if (res.ok) {
-            alertBox.innerHTML = '<div class="alert alert-success py-2 small"><i class="fa-solid fa-circle-check me-2"></i>Consignment Dispatched & SLA Timer Started!</div>';
+            alertBox.innerHTML = '<div class="alert alert-success py-2 small"><i class="fa-solid fa-circle-check me-2"></i>Consignment successfully dispatched!</div>';
             document.getElementById('trackNo').value = '';
             document.getElementById('weight').value = '';
             await loadAllData();
         } else {
             const err = await res.json();
-            alertBox.innerHTML = `<div class="alert alert-danger py-2 small"><i class="fa-solid fa-triangle-exclamation me-2"></i><strong>Transaction Aborted:</strong> ${err.error}</div>`;
+            alertBox.innerHTML = `<div class="alert alert-danger py-2 small"><i class="fa-solid fa-triangle-exclamation me-2"></i><strong>Dispatch Failed:</strong> ${err.error}</div>`;
         }
     });
 
-    // Form 2: Add Inventory Item (Admin Action)
+    // Add Inventory Stock
     document.getElementById('addItemForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         const code = document.getElementById('newItemCode').value;
@@ -564,7 +804,7 @@
 
         const res = await fetch(`${API}/inventory?code=${code}&name=${name}&qty=${qty}&threshold=${threshold}`, { method: 'POST' });
         if (res.ok) {
-            alertBox.innerHTML = '<div class="alert alert-success py-2 small">Item saved to MySQL successfully!</div>';
+            alertBox.innerHTML = '<div class="alert alert-success py-2 small"><i class="fa-solid fa-circle-check me-2"></i>Product added to warehouse inventory!</div>';
             document.getElementById('newItemCode').value = '';
             document.getElementById('newItemName').value = '';
             await loadAllData();
@@ -574,7 +814,7 @@
         }
     });
 
-    // Form 3: Register System User (Admin Action)
+    // Register User
     document.getElementById('addUserForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         const username = document.getElementById('newUsername').value;
@@ -584,7 +824,7 @@
 
         const res = await fetch(`${API}/users?username=${username}&password=${password}&role=${role}`, { method: 'POST' });
         if (res.ok) {
-            alertBox.innerHTML = '<div class="alert alert-success py-2 small">User registered successfully!</div>';
+            alertBox.innerHTML = '<div class="alert alert-success py-2 small"><i class="fa-solid fa-circle-check me-2"></i>User account registered successfully!</div>';
             document.getElementById('newUsername').value = '';
             document.getElementById('newPassword').value = '';
             await loadAllData();
@@ -594,16 +834,14 @@
         }
     });
 
-    // BMT Action: Customs Clearance Pass / Reject
+    // Customs Pass / Reject
     async function handleClearance(id, approved) {
         await fetch(`${API}/shipments/${id}/clearance?approved=${approved}`, { method: 'POST' });
         await loadAllData();
     }
 
-    // Initial load when page opens
+    // Auto Refresh
     window.addEventListener('DOMContentLoaded', loadAllData);
-
-    // Auto-refresh grid every 5 seconds for live SLA monitoring
     setInterval(loadAllData, 5000);
 </script>
 </body>
