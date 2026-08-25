@@ -7,13 +7,14 @@ import java.util.Date;
 @Entity
 @Table(name = "audit_logs")
 public class AuditTrail implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "executed_by", referencedColumnName = "username")
-    private User executedBy;
+    @Column(name = "executed_by", length = 50)
+    private String executedBy;
 
     @Column(name = "service_name", length = 100)
     private String serviceName;
@@ -24,15 +25,16 @@ public class AuditTrail implements Serializable {
     @Column(name = "execution_time_ms")
     private Long executionTimeMs;
 
-    @Column(name = "status", length = 255)
+    @Column(name = "status")
     private String status;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "logged_at", insertable = false, updatable = false)
-    private Date loggedAt = new Date();
+    private Date loggedAt;
 
-    public AuditTrail(String caller, String className, String methodName, long executionTime, String status) {}
-    public AuditTrail(User executedBy, String serviceName, String methodName, Long executionTimeMs, String status) {
+    public AuditTrail() {}
+
+    public AuditTrail(String executedBy, String serviceName, String methodName, Long executionTimeMs, String status) {
         this.executedBy = executedBy;
         this.serviceName = serviceName;
         this.methodName = methodName;
@@ -41,10 +43,17 @@ public class AuditTrail implements Serializable {
     }
 
     public Long getId() { return id; }
-    public User getExecutedBy() { return executedBy; }
+    public void setId(Long id) { this.id = id; }
+    public String getExecutedBy() { return executedBy; }
+    public void setExecutedBy(String executedBy) { this.executedBy = executedBy; }
     public String getServiceName() { return serviceName; }
+    public void setServiceName(String serviceName) { this.serviceName = serviceName; }
     public String getMethodName() { return methodName; }
+    public void setMethodName(String methodName) { this.methodName = methodName; }
     public Long getExecutionTimeMs() { return executionTimeMs; }
+    public void setExecutionTimeMs(Long executionTimeMs) { this.executionTimeMs = executionTimeMs; }
     public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
     public Date getLoggedAt() { return loggedAt; }
+    public void setLoggedAt(Date loggedAt) { this.loggedAt = loggedAt; }
 }

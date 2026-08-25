@@ -11,11 +11,23 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.List;
+import lk.globaltrade.scm.entity.AuditTrail;
 
 @Path("/scm")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class ShipmentResource {
+
+    @GET
+    @Path("/audits")
+    public Response getAuditLogs() {
+        try {
+            List<AuditTrail> logs = lookupOrderService().getAllAuditLogs();
+            return Response.ok(logs).build();
+        } catch (Exception e) {
+            return Response.status(500).entity("{\"error\": \"" + e.getMessage() + "\"}").build();
+        }
+    }
 
     private OrderProcessingService lookupOrderService() {
         try {

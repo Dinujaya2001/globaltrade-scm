@@ -19,6 +19,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.io.Serializable;
 import java.util.List;
+import lk.globaltrade.scm.entity.AuditTrail;
 
 @Stateless
 @LocalBean
@@ -31,6 +32,14 @@ public class OrderProcessingService implements Serializable {
 
     @EJB
     private AutomatedTrackingTimerService timerService;
+
+    @PermitAll
+    @TransactionAttribute(TransactionAttributeType.SUPPORTS)
+    public List<AuditTrail> getAllAuditLogs() {
+        return em.createQuery("SELECT a FROM AuditTrail a ORDER BY a.id DESC", AuditTrail.class)
+                .setMaxResults(50)
+                .getResultList();
+    }
 
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public Shipment createShipmentWithItems(String trackingNo, String origin, String destination,

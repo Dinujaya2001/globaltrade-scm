@@ -151,6 +151,11 @@
                 <i class="fa-solid fa-users-gear me-2"></i>Vendors & Governance
             </button>
         </li>
+        <li class="nav-item admin-only-tab" role="presentation">
+            <button class="nav-link" id="pills-audits-tab" data-bs-toggle="pill" data-bs-target="#pills-audits" type="button" role="tab">
+                <i class="fa-solid fa-clipboard-list me-2"></i>AOP Audit Trails
+            </button>
+        </li>
     </ul>
 
     <div class="tab-content" id="pills-tabContent">
@@ -338,6 +343,34 @@
         </div>
 
     </div>
+
+    <!-- Tab 4: AOP Audit Trails (Admin Only) -->
+    <div class="tab-pane fade" id="pills-audits" role="tabpanel">
+        <div class="glass-card p-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                    <h5 class="fw-bold mb-0 text-info"><i class="fa-solid fa-shield-halved me-2"></i>EJB AOP Interceptor Audit Trail</h5>
+                    <p class="text-muted small mb-0">Real-time telemetry and invocation metrics captured via LogisticsAuditInterceptor</p>
+                </div>
+                <button class="btn btn-sm btn-outline-info" onclick="loadAllData()"><i class="fa-solid fa-arrows-rotate me-1"></i> Refresh</button>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-custom align-middle">
+                    <thead>
+                    <tr class="text-muted small">
+                        <th>ID</th>
+                        <th>Target EJB Service</th>
+                        <th>Invoked Method</th>
+                        <th>Caller Principal</th>
+                        <th>Execution (ms)</th>
+                        <th>Invocation Status</th>
+                    </tr>
+                    </thead>
+                    <tbody id="auditFullTable"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
@@ -453,6 +486,40 @@
                             </td>
                         </tr>`;
                 });
+            }
+
+            // 4. Fetch AOP Audit Logs
+            const auditRes = await fetch(`${API}/audits`);
+            if (auditRes.ok) {
+                const logs = await auditRes.json();
+                const auditTable = document.getElementById('auditFullTable');
+                if (auditTable) {
+                    auditTable.innerHTML = '';
+                    if (logs.length === 0) {
+                        auditTable.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-4">No audit logs recorded yet.</td></tr>';
+                    } else {
+                        logs.forEach(l => {
+                            // Match property names correctly
+                            const sName = l.serviceName || l.service_name || 'OrderProcessingService';
+                            const mName = l.methodName || l.method_name || 'execute';
+                            const execTime = l.executionTimeMs !== undefined ? l.executionTimeMs : (l.executionTime !== undefined ? l.executionTime : 0);
+                            const stat = l.status || 'SUCCESS';
+                            const user = l.executedBy || l.caller || 'ANONYMOUS';
+
+                            const isSuccess = String(stat).startsWith('SUCCESS');
+
+                            auditTable.innerHTML += `
+                    <tr>
+                        <td><span class="text-muted">#${l.id}</span></td>
+                        <td><strong class="text-light">${sName}</strong></td>
+                        <td><span class="badge bg-dark border border-secondary text-info">${mName}()</span></td>
+                        <td><span class="text-muted small">${user}</span></td>
+                        <td><span class="text-warning">${execTime} ms</span></td>
+                        <td><span class="badge ${isSuccess ? 'badge-cleared' : 'badge-rejected'} px-2 py-1">${stat}</span></td>
+                    </tr>`;
+                        });
+                    }
+                }
             }
         } catch (e) {
             console.error('Error loading data:', e);
