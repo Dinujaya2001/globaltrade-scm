@@ -1,15 +1,19 @@
 package lk.globaltrade.scm.entity;
 
+import javax.json.bind.annotation.JsonbTransient;
 import javax.persistence.*;
 import java.io.Serializable;
 
 @Entity
 @Table(name = "shipment_items")
 public class ShipmentItem implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @JsonbTransient
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "shipment_id", nullable = false)
     private Shipment shipment;
@@ -22,6 +26,7 @@ public class ShipmentItem implements Serializable {
     private int quantity;
 
     public ShipmentItem() {}
+
     public ShipmentItem(Shipment shipment, InventoryItem inventoryItem, int quantity) {
         this.shipment = shipment;
         this.inventoryItem = inventoryItem;
@@ -29,6 +34,7 @@ public class ShipmentItem implements Serializable {
     }
 
     public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
     public Shipment getShipment() { return shipment; }
     public void setShipment(Shipment shipment) { this.shipment = shipment; }
     public InventoryItem getInventoryItem() { return inventoryItem; }

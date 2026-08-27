@@ -30,8 +30,9 @@ public class Shipment implements Serializable {
     @Column(name = "status", nullable = false, length = 50)
     private String status;
 
+    // Foreign key link එක User එකේ username වෙත නිවැරදිව map කිරීම
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "vendor_id", nullable = false)
+    @JoinColumn(name = "vendor_id", referencedColumnName = "username", nullable = false)
     private User vendor;
 
     @Temporal(TemporalType.TIMESTAMP)

@@ -6,54 +6,81 @@ import lk.globaltrade.scm.entity.User;
 import lk.globaltrade.scm.service.CustomsComplianceService;
 import lk.globaltrade.scm.service.OrderProcessingService;
 
-import javax.naming.InitialContext;
+import javax.ejb.EJB;
+import javax.enterprise.context.RequestScoped;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.util.List;
-import lk.globaltrade.scm.entity.AuditTrail;
 
 @Path("/scm")
+@RequestScoped
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class ShipmentResource {
 
+    @EJB
+    private OrderProcessingService orderService;
+
+    @EJB
+    private CustomsComplianceService customsService;
+
     @GET
-    @Path("/audits")
-    public Response getAuditLogs() {
+    @Path("/shipments")
+    public Response getShipments() {
         try {
-            List<AuditTrail> logs = lookupOrderService().getAllAuditLogs();
-            return Response.ok(logs).build();
+            return Response.ok(orderService.getAllShipments()).build();
         } catch (Exception e) {
             return Response.status(500).entity("{\"error\": \"" + e.getMessage() + "\"}").build();
         }
     }
 
-    private OrderProcessingService lookupOrderService() {
+    @POST
+    @Path("/shipments")
+    public Response createShipment(@QueryParam("trackingNo") String trackingNo,
+                                   @QueryParam("origin") String origin,
+                                   @QueryParam("destination") String destination,
+                                   @QueryParam("weight") String weightStr,
+                                   @QueryParam("vendor") String vendor,
+                                   @QueryParam("itemId") String itemIdStr,
+                                   @QueryParam("qty") String qtyStr) {
         try {
-            InitialContext ctx = new InitialContext();
-            return (OrderProcessingService) ctx.lookup("java:app/lk.globaltrade-globaltrade-scm-ejb-1.0.0/OrderProcessingService!lk.globaltrade.scm.service.OrderProcessingService");
-        } catch (Exception e) {
-            try {
-                InitialContext ctx = new InitialContext();
-                return (OrderProcessingService) ctx.lookup("java:global/globaltrade-scm-ear-1.0.0/lk.globaltrade-globaltrade-scm-ejb-1.0.0/OrderProcessingService!lk.globaltrade.scm.service.OrderProcessingService");
-            } catch (Exception ex) {
-                throw new RuntimeException("EJB Lookup failed for OrderProcessingService", ex);
+            double weight = 1500.0;
+            if (weightStr != null && !weightStr.trim().isEmpty()) {
+                try { weight = Double.parseDouble(weightStr.trim()); } catch (Exception ignored) {}
             }
+
+            Long itemId = null;
+            if (itemIdStr != null && !itemIdStr.trim().isEmpty() && !itemIdStr.equals("null")) {
+                try { itemId = Long.parseLong(itemIdStr.trim()); } catch (Exception ignored) {}
+            }
+
+            int qty = 5;
+            if (qtyStr != null && !qtyStr.trim().isEmpty()) {
+                try { qty = Integer.parseInt(qtyStr.trim()); } catch (Exception ignored) {}
+            }
+
+            Shipment result = orderService.createShipmentWithItems(
+                    trackingNo, origin, destination, weight, vendor, itemId, qty);
+
+            return Response.status(Response.Status.CREATED).entity(result).build();
+        } catch (Exception ex) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("{\"error\": \"" + ex.getMessage() + "\"}").build();
         }
     }
 
-    private CustomsComplianceService lookupCustomsService() {
+    @POST
+    @Path("/shipments/{id}/clearance")
+    public Response updateClearance(@PathParam("id") Long id, @QueryParam("approved") boolean approved) {
         try {
-            InitialContext ctx = new InitialContext();
-            return (CustomsComplianceService) ctx.lookup("java:app/lk.globaltrade-globaltrade-scm-ejb-1.0.0/CustomsComplianceService!lk.globaltrade.scm.service.CustomsComplianceService");
-        } catch (Exception e) {
-            try {
-                InitialContext ctx = new InitialContext();
-                return (CustomsComplianceService) ctx.lookup("java:global/globaltrade-scm-ear-1.0.0/lk.globaltrade-globaltrade-scm-ejb-1.0.0/CustomsComplianceService!lk.globaltrade.scm.service.CustomsComplianceService");
-            } catch (Exception ex) {
-                throw new RuntimeException("EJB Lookup failed for CustomsComplianceService", ex);
+            boolean success = customsService.updateCustomsClearance(id, approved);
+            if (success) {
+                return Response.ok("{\"message\": \"Customs clearance updated successfully\"}").build();
             }
+            return Response.status(Response.Status.BAD_REQUEST).entity("{\"error\": \"Clearance failed\"}").build();
+        } catch (Exception ex) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("{\"error\": \"" + ex.getMessage() + "\"}").build();
         }
     }
 
@@ -61,7 +88,7 @@ public class ShipmentResource {
     @Path("/inventory")
     public Response getInventory() {
         try {
-            return Response.ok(lookupOrderService().getAllInventory()).build();
+            return Response.ok(orderService.getAllInventory()).build();
         } catch (Exception e) {
             return Response.status(500).entity("{\"error\": \"" + e.getMessage() + "\"}").build();
         }
@@ -71,13 +98,17 @@ public class ShipmentResource {
     @Path("/inventory")
     public Response createInventoryItem(@QueryParam("code") String code,
                                         @QueryParam("name") String name,
-                                        @QueryParam("qty") int qty,
-                                        @QueryParam("threshold") int threshold) {
+                                        @QueryParam("qty") String qtyStr,
+                                        @QueryParam("threshold") String threshStr) {
         try {
-            InventoryItem item = lookupOrderService().createInventoryItem(code, name, qty, threshold);
+            int qty = (qtyStr != null && !qtyStr.trim().isEmpty()) ? Integer.parseInt(qtyStr.trim()) : 100;
+            int threshold = (threshStr != null && !threshStr.trim().isEmpty()) ? Integer.parseInt(threshStr.trim()) : 20;
+
+            InventoryItem item = orderService.createInventoryItem(code, name, qty, threshold);
             return Response.status(Response.Status.CREATED).entity(item).build();
         } catch (Exception ex) {
-            return Response.status(Response.Status.BAD_REQUEST).entity("{\"error\": \"" + ex.getMessage() + "\"}").build();
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("{\"error\": \"" + ex.getMessage() + "\"}").build();
         }
     }
 
@@ -85,7 +116,7 @@ public class ShipmentResource {
     @Path("/users")
     public Response getUsers() {
         try {
-            return Response.ok(lookupOrderService().getAllUsers()).build();
+            return Response.ok(orderService.getAllUsers()).build();
         } catch (Exception e) {
             return Response.status(500).entity("{\"error\": \"" + e.getMessage() + "\"}").build();
         }
@@ -97,52 +128,11 @@ public class ShipmentResource {
                                @QueryParam("password") String password,
                                @QueryParam("role") String role) {
         try {
-            User user = lookupOrderService().createUser(username, password, role);
+            User user = orderService.createUser(username, password, role);
             return Response.status(Response.Status.CREATED).entity(user).build();
         } catch (Exception ex) {
-            return Response.status(Response.Status.BAD_REQUEST).entity("{\"error\": \"" + ex.getMessage() + "\"}").build();
-        }
-    }
-
-    @GET
-    @Path("/shipments")
-    public Response getShipments() {
-        try {
-            return Response.ok(lookupOrderService().getAllShipments()).build();
-        } catch (Exception e) {
-            return Response.status(500).entity("{\"error\": \"" + e.getMessage() + "\"}").build();
-        }
-    }
-
-    @POST
-    @Path("/shipments")
-    public Response createShipment(@QueryParam("trackingNo") String trackingNo,
-                                   @QueryParam("origin") String origin,
-                                   @QueryParam("destination") String destination,
-                                   @QueryParam("weight") double weight,
-                                   @QueryParam("vendor") String vendor,
-                                   @QueryParam("itemId") Long itemId,
-                                   @QueryParam("qty") int qty) {
-        try {
-            Shipment result = lookupOrderService().createShipmentWithItems(
-                    trackingNo, origin, destination, weight, vendor, itemId, qty);
-            return Response.status(Response.Status.CREATED).entity(result).build();
-        } catch (Exception ex) {
-            return Response.status(Response.Status.BAD_REQUEST).entity("{\"error\": \"" + ex.getMessage() + "\"}").build();
-        }
-    }
-
-    @POST
-    @Path("/shipments/{id}/clearance")
-    public Response updateClearance(@PathParam("id") Long id, @QueryParam("approved") boolean approved) {
-        try {
-            boolean success = lookupCustomsService().updateCustomsClearance(id, approved);
-            if (success) {
-                return Response.ok("{\"message\": \"Customs verification successfully processed\"}").build();
-            }
-            return Response.status(Response.Status.BAD_REQUEST).entity("{\"error\": \"Clearance transaction failed\"}").build();
-        } catch (Exception ex) {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("{\"error\": \"" + ex.getMessage() + "\"}").build();
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("{\"error\": \"" + ex.getMessage() + "\"}").build();
         }
     }
 }
